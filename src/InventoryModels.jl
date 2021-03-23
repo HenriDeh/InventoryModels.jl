@@ -6,8 +6,9 @@ const State = Union{NumDist, AbstractVector{<:NumDist}}
 
 abstract type BOMElement end
 
-include("utils.jl")
 export observe, observation_size, action_size, activate!, replenish!, pull!, reward!, reset!, dispatch!
+include("utils.jl")
+export test_policy
 include("item.jl")
 export Item, LinearHoldingCost
 include("policies.jl")
@@ -24,6 +25,8 @@ include("cvnormal.jl")
 export CVNormal
 include("inventory_system.jl")
 export InventorySystem
+include("zoo.jl")
+export sl_sip
 
 
 #=
