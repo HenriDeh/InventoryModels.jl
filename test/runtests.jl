@@ -132,8 +132,8 @@ using Revise, Distributions, InventoryModels, Test
         @test observe(market) != [0, 10, 0.1, 10, 0.1, 10, 0.1, 10, 0.1]
         reset!(sup)
         reset!(item)
-        market2 = Market(LinearStockoutCost(5), CVNormal{0.4}, 3, item, Uniform(-10,0), [20,40,60,40])
-        @test observe(market2)[2:end] == [20,40,60]
+        market2 = Market(LinearStockoutCost(5), CVNormal{0.4}, 2, item, Uniform(-10,0), [20,40,60,40])
+        @test observe(market2)[2:end] == [20,40]
         activate!(market2, [])
         demand = market2.backorder
         @test first(item.pull_orders) == (market2 => demand)
@@ -145,9 +145,9 @@ using Revise, Distributions, InventoryModels, Test
         @test reward!(sup) == 0
         @test reward!(item) == 0
         @test reward!(market2) == -5*(demand-5)
-        @test observe(market2) == [(demand-5), 40, 60, 40]
+        @test observe(market2) == [(demand-5), 40, 60]
         reset!(market2)
-        @test observe(market2)[2:end] == [20,40,60]
+        @test observe(market2)[2:end] == [20,40]
     end
     @testset "assembly.jl" begin
         source = []
@@ -229,5 +229,17 @@ using Revise, Distributions, InventoryModels, Test
         @test is.bom == bom_s
         @test observation_size(is) == length(observe(is)) == 0+0+0+0+1+1+1+0+2+21+1+11
         @test action_size(is) == 10
+
+        is2 = sl_sip(1,10,100,0.,0,[20,40,60,40])
+        @test observe(is2) == [0,20,40,60,40,0]
+        @test is2([14,70]) == -(100 + 0 + 50*1)
+        @test observe(is2) == [0,40,60,40,0,50]
+        @test is2([29,141]) == -10
+        @test is2([58,114]) == -(100 + 114-60)
+        @test is2([28,53]) == -(114-60-40)
+        @test observe(is2) == [0,0,0,0,0, 14]
+        reset!(is2)
+        @test observe(is2) == [0,20,40,60,40,0]
+        @test test_policy(sl_sip(1,10,100,0.25,0,[20,40,60,40]), [14,70,29,141,58,114,28,53], 10000) ≈ -363 atol = 2
     end
 end

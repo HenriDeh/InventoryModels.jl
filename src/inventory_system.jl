@@ -7,7 +7,7 @@ end
 function InventorySystem(T, bom::Vector{BOMElement})
     maxT = T == Inf ? typemax(Int) : Int(T)
     bom_to = topological_order(bom)
-    InventorySystem(maxT, 1, bom_to)
+    InventorySystem(1, maxT, bom_to)
 end
 function InventorySystem(T, bom::BOMElement...)
     InventorySystem(T, [bom...])
@@ -18,12 +18,13 @@ observation_size(is::InventorySystem) = sum(observation_size.(is.bom))
 action_size(is::InventorySystem)::Int = sum(action_size.(is.bom))
 
 function (is::InventorySystem)(action::AbstractVector)
-    @assert is.t < is.T "InventorySystem is at terminal state, please use reset!(::InventorySystem)" 
+    @assert is.t <= is.T "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
+    @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
     actions = Iterators.Stateful(action)
-    for (elemement, act_size) in zip(is.bom, action_sizes)
+    for (elemement, act_size) in zip(is.bom, action_size.(is.bom))
         activate!(elemement, Iterators.take(actions, act_size))
     end
-    for element in is.bom
+    for element in Iterators.reverse(is.bom)
         dispatch!(element)
     end
     is.t += 1
