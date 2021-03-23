@@ -1,10 +1,36 @@
 module InventoryModels
+
+using Distributions, DataStructures, MacroTools, Base.Iterators
+const NumDist = Union{Number, Distribution}
+const State = Union{NumDist, AbstractVector{<:NumDist}}
+
+abstract type BOMElement end
+
+include("utils.jl")
+export observe, observation_size, action_size, activate!, replenish!, pull!, reward!, reset!, dispatch!
+include("item.jl")
+export Item, LinearHoldingCost
+include("policies.jl")
+export sSPolicy, RQPolicy, QPolicy, BQPolicy
+include("supplier.jl")
+export Supplier, LinearOrderCost, FixedLinearOrderCost
+include("leadtime.jl")
+export LeadTime
+include("market.jl")
+export Market, LinearStockoutCost
+include("assembly.jl")
+export Assembly
+include("cvnormal.jl")
+export CVNormal
+include("inventory_system.jl")
+export InventorySystem
+
+
+#=
 include("Scarf.jl")
 
-using SpecialFunctions, Reexport
 import DataStructures: Queue, enqueue!, dequeue!, Deque
 import MacroTools.@forward
-@reexport using Distributions
 import Distributions.params
 @reexport using .Scarf
 export BOMElement, ActionableElement, Inventory, Supplier, ProductInventory, Market, InventoryProblem
@@ -336,5 +362,5 @@ action_squashing_function(ip::InventoryProblem) = x -> max(zero(x), x)
 Base.eltype(ip::InventoryProblem{T}) where T = T
 
 include("policy_tests.jl")
-include("DynamicEnvi.jl")
-end #module
+include("DynamicEnvi.jl")=#
+end # of module
