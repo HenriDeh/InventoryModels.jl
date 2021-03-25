@@ -2,23 +2,26 @@ mutable struct InventorySystem
     t::Int
     T::Int
     bom::Vector{BOMElement}
+    reward::Float64
 end
 
 function InventorySystem(T, bom::Vector{BOMElement})
     maxT = T == Inf ? typemax(Int) : Int(T)
     bom_to = topological_order(bom)
-    InventorySystem(1, maxT, bom_to)
+    InventorySystem(1, maxT, bom_to, 0.)
 end
 function InventorySystem(T, bom::BOMElement...)
     InventorySystem(T, [bom...])
 end
 
-observe(is::InventorySystem) = reduce(vcat, observe.(is.bom))
-observation_size(is::InventorySystem) = sum(observation_size.(is.bom))
+state(is::InventorySystem) = reduce(vcat, state.(is.bom))
+state_size(is::InventorySystem) = sum(state_size.(is.bom))
 action_size(is::InventorySystem)::Int = sum(action_size.(is.bom))
+is_terminated(is::InventorySystem) = is.t > is.T
+reward(is::InventorySystem) = is.reward
 
 function (is::InventorySystem)(action::AbstractVector)
-    @assert is.t <= is.T "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
+    @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
     @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
     actions = Iterators.Stateful(action)
     for (elemement, act_size) in zip(is.bom, action_size.(is.bom))
@@ -28,7 +31,8 @@ function (is::InventorySystem)(action::AbstractVector)
         dispatch!(element)
     end
     is.t += 1
-    return sum(reward!.(is.bom))
+    is.reward = sum(reward!.(is.bom)) 
+    return 
 end
 
 (is::InventorySystem)(action::AbstractMatrix) = is(vec(action))

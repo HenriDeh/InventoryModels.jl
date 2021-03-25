@@ -8,22 +8,27 @@ mutable struct LeadTime{F, D<:Distribution, S} <: BOMElement
     name::String
 end
 
-function LeadTime(holding_cost, leadtime::Int, onorder::NumDist, source; name ="")
+function LeadTime(holding_cost, leadtime::Number, onorder::NumDist, source; name ="")
     @assert hasmethod(holding_cost, Tuple{LeadTime}) "holding cost must have a method with (::LeadTime) signature"
     doo = parametrify(onorder)
     oo = rand(doo, leadtime)
-    LeadTime(holding_cost, max.(zero(eltype(oo)), oo), leadtime, doo, source, IdDict{Any, eltype(oo)}(), name)
+    LeadTime(holding_cost, max.(zero(eltype(oo)), oo), Int(leadtime), doo, source, IdDict{Any, eltype(oo)}(), name)
 end
 
+function LeadTime(holding_cost::Number, leadtime::Number, onorder::NumDist, source; name ="")
+    LeadTime(LinearHoldingCost(holding_cost), Int(leadtime), onorder, source, name = name)
+end
 
-function LeadTime(leadtime::Int, onorder::NumDist, source; name ="")
+function LeadTime(leadtime::Number, onorder::NumDist, source; name ="")
+    lt = Int(leadtime)
     doo = parametrify(onorder)
-    oo = rand(doo, leadtime)
-    LeadTime(it->zero(eltype(oo)),max.(zero(eltype(oo)), oo), leadtime, doo, source, IdDict{Any, eltype(oo)}(), name)
+    oo = rand(doo, lt)
+    LeadTime(it->zero(eltype(oo)),max.(zero(eltype(oo)), oo), lt, doo, source, IdDict{Any, eltype(oo)}(), name)
 end
 
-observe(lt::LeadTime) = vec(lt.onorder)
-observation_size(lt::LeadTime) = lt.leadtime
+
+state(lt::LeadTime) = vec(lt.onorder)
+state_size(lt::LeadTime) = lt.leadtime
 action_size(::LeadTime)::Int = 0
 
 function pull!(lt::LeadTime, quantity, issuer)
@@ -54,8 +59,8 @@ function reward!(lt::LeadTime)
     return -cost
 end
     
-function reset!(lt::LeadTime{T}) where T
-    lt.onorder = max.(zero(T), rand(lt.onorder_reset, lt.leadtime))
+function reset!(lt::LeadTime) where T
+    lt.onorder = max.(0., rand(lt.onorder_reset, lt.leadtime))
 end
 
 children(lt::LeadTime) = (lt.source,)

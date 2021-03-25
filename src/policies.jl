@@ -30,3 +30,7 @@ function (::BQPolicy)(::Item, B, Q)
 end
 
 action_size(::BQPolicy) = 2
+
+#(R, nQ) 
+#StaticStaticPolicy
+#StaticDynamicPolicy

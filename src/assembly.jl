@@ -12,8 +12,12 @@ function Assembly(production_cost, components::Pair{<:Item, <:Number}...; capaci
     Assembly(production_cost, Float64(capacity), IdDict{Item, Float64}(components), IdDict{Any,Float64}(), name)
 end
 
-observe(::Assembly) = Float64[]
-observation_size(::Assembly) = 0
+function Assembly(fixed_order_cost::Number, variable_order_cost::Number, components::Pair{<:Item, <:Number}...; capacity = Inf, name = "" )
+    Assembly(FixedLinearOrderCost(fixed_order_cost, variable_order_cost), components..., capacity = capacity, name = name )
+end
+
+state(::Assembly) = Float64[]
+state_size(::Assembly) = 0
 action_size(::Assembly)::Int = 0
 
 function pull!(ass::Assembly, quantity::Number, issuer)

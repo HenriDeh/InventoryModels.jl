@@ -8,7 +8,8 @@ function test_policy(is::InventorySystem, policy, n = 1000)
     for _ in 1:n
         reset!(is)
         for action in partition(policy, action_size(is))
-            totreward += is(action)
+            is(action)
+            totreward += reward(is)
         end
     end
     totreward/=n

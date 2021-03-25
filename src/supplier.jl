@@ -13,8 +13,12 @@ function Supplier(order_cost; capacity::Number = Inf, name = "")
     Supplier(order_cost, Float64(capacity), IdDict{Any,Float64}(), name)
 end
 
-observe(::Supplier) = Float64[]
-observation_size(::Supplier) = 0
+function Supplier(fixed_order_cost::Number, variable_order_cost::Number; capacity::Number = Inf, name = "") 
+    Supplier(FixedLinearOrderCost(fixed_order_cost,variable_order_cost), capacity = capacity, name = name)
+end
+
+state(::Supplier) = Float64[]
+state_size(::Supplier) = 0
 action_size(::Supplier)::Int = 0
 
 function pull!(sup::Supplier, quantity::Number, issuer)

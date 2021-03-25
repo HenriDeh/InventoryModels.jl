@@ -24,8 +24,12 @@ function Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizo
         stockout_cost, demand_distribution, Float64(rand(bd)), lostsales, horizon, forecasts, source, bd, tuple(frd...), name)
 end
 
-observe(ma::Market) = ma.lostsales ? ma.forecasts : [ma.backorder; ma.forecasts]
-observation_size(ma::Market) = (ma.lostsales != 1) + ma.horizon*length(ma.forecast_reset)
+function Market(stockout_cost::Number, demand_distribution::Type{<:Distribution}, horizon::Int, source, backorder_reset::NumDist, forecast_reset::State...; lostsales = false, name="")
+    Market(LinearStockoutCost(stockout_cost), demand_distribution, horizon, source, backorder_reset, forecast_reset..., lostsales = lostsales, name = name)
+end
+
+state(ma::Market) = ma.lostsales ? ma.forecasts : [ma.backorder; ma.forecasts]
+state_size(ma::Market) = (ma.lostsales != 1) + ma.horizon*length(ma.forecast_reset)
 action_size(::Market)::Int = 0
 
 function pull!(::Market, ::Any...)

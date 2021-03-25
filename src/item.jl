@@ -27,8 +27,12 @@ function Item(holding_cost, policy, onhand::NumDist, sources...; capacity::Numbe
         holding_cost, policy, Float64(max(zero(eltype(dl)), rand(dl))), Float64(capacity), s, dl,  IdDict(), name)
 end
 
-observe(item::Item) = [item.onhand]
-observation_size(::Item) = 1
+function Item(holding_cost::Number, policy, onhand::NumDist, sources...; capacity::Number = Inf, name = "")
+    Item(LinearHoldingCost(holding_cost), policy, onhand, sources..., capacity = capacity, name = name)
+end
+
+state(item::Item) = [item.onhand]
+state_size(::Item) = 1
 action_size(item::Item)::Int = length(item.sources)*action_size(item.policy)
 
 """
@@ -67,13 +71,11 @@ end
 
 function dispatch!(item::Item)
     sumorders = sum(values(item.pull_orders))
-    if sumorders != 0
-        proportion =  min(one(sumorders), item.onhand/sumorders)
-        for (issuer, quantity) in item.pull_orders
-            push!(issuer, quantity*proportion, item)
-        end
-        item.onhand -= proportion*sumorders
+    proportion = sumorders != 0 ?  min(one(sumorders), item.onhand/sumorders) : 0.
+    for (issuer, quantity) in item.pull_orders
+        push!(issuer, quantity*proportion, item)
     end
+    item.onhand -= proportion*sumorders
     nothing
 end
 
