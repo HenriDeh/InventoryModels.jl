@@ -71,11 +71,17 @@ end
 
 function dispatch!(item::Item)
     sumorders = sum(values(item.pull_orders))
-    proportion = sumorders != 0 ?  min(one(sumorders), item.onhand/sumorders) : 0.
+    if sumorders != 0 
+        proportion = min(one(sumorders), item.onhand/sumorders)
     for (issuer, quantity) in item.pull_orders
         push!(issuer, quantity*proportion, item)
     end
     item.onhand -= proportion*sumorders
+    else
+        for (issuer, quantity) in item.pull_orders
+            push!(issuer, 0.0, item)
+        end
+    end
     nothing
 end
 
