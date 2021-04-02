@@ -59,7 +59,7 @@ function reward!(lt::LeadTime)
     return -cost
 end
     
-function reset!(lt::LeadTime) where T
+function reset!(lt::LeadTime)
     lt.onorder = max.(0., rand(lt.onorder_reset, lt.leadtime))
 end
 

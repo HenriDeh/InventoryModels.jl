@@ -14,7 +14,7 @@ export LeadTime
 export Market, LinearStockoutCost
 export Assembly
 export CVNormal
-export InventorySystem, state, state_size, action_size, reward, reset!
+export InventorySystem, state, state_size, action_size, reward, reset!, is_terminated
 export sl_sip
 include("item.jl")
 include("policies.jl")
