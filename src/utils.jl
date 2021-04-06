@@ -10,6 +10,7 @@ function test_policy(is::InventorySystem, policy, n = 1000)
         for action in partition(policy, action_size(is))
             is(action)
             totreward += reward(is)
+            if is_terminated(is) break end
         end
     end
     totreward/=n
