@@ -138,6 +138,7 @@ using Revise, Distributions, InventoryModels, Test
         InventoryModels.activate!(market2, [])
         demand = market2.last_demand
         @test first(item.pull_orders) == (market2 => demand + backorder)
+        @assert InventoryModels.inventory_position(item) == item.onhand - backorder
         InventoryModels.activate!(item, [0, 0])
         InventoryModels.activate!(sup,[])
         InventoryModels.dispatch!(sup)
