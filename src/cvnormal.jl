@@ -11,5 +11,6 @@ MacroTools.@forward CVNormal.normal Distributions.mean, Base.rand, Distributions
 Distributions.params(d::CVNormal) = mean(d)
 
 cv(d::CVNormal{CV}) where CV = CV
+cv(d::Type{CVNormal{CV}}) where CV = CV
 
 #Base.show(io::IO, n::CVNormal) = show(n.normal)
