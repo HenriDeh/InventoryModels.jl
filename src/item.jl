@@ -108,7 +108,8 @@ function reset!(item::Item)
 end
 
 function inventory_position(item::Item)
-    item.onhand + sum(Float64[sum(source.onorder) for source in item.sources if source isa LeadTime])
+    item.onhand + sum(Float64[sum(source.onorder) for source in item.sources if source isa LeadTime]) - 
+        sum(Float64[dest.backorder for dest in keys(item.pull_orders) if dest isa Market])
 end
 
 children(item::Item) = item.sources

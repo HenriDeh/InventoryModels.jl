@@ -5,6 +5,7 @@ mutable struct Market{D<:Distribution, L<:Union{Bool, AbstractFloat}, F, S, Df, 
     lostsales::L
     horizon::Int
     forecasts::Vector{Float64}
+    last_demand::Float64
     source::S
     backorder_reset::Db
     forecast_reset::Df
@@ -21,7 +22,7 @@ function Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizo
     forecasts = Float64[rand(param) for _ in 1:horizon for param in popfirst!.(frd)]
 
     Market{demand_distribution, typeof(lostsales), typeof(stockout_cost), typeof(source), typeof(frd), typeof(bd)}(
-        stockout_cost, demand_distribution, Float64(rand(bd)), lostsales, horizon, forecasts, source, bd, tuple(frd...), name)
+        stockout_cost, demand_distribution, Float64(rand(bd)), lostsales, horizon, forecasts, 0.0, source, bd, tuple(frd...), name)
 end
 
 function Market(stockout_cost::Number, demand_distribution::Type{<:Distribution}, horizon::Int, source, backorder_reset::NumDist, forecast_reset::State...; lostsales = false, name="")
@@ -36,7 +37,8 @@ function pull!(::Market, ::Any...)
     nothing
 end
 
-function Base.push!(ma::Market, quantity, source)
+function Base.push!(ma::Market, quantity, source)  
+    ma.backorder += ma.last_demand 
     ma.backorder -= min(quantity, ma.backorder)
     return nothing
 end
@@ -44,8 +46,8 @@ end
 function activate!(ma::Market, action)
     param = ma.forecasts[1:length(ma.forecast_reset)]
     demand = rand(ma.demand_dist(param...))
-    ma.backorder += max(zero(demand), demand)
-    pull!(ma.source, ma.backorder, ma)
+    ma.last_demand = max(zero(demand), demand)
+    pull!(ma.source, ma.backorder + ma.last_demand, ma)
     nothing
 end
 

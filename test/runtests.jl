@@ -110,8 +110,8 @@ using Revise, Distributions, InventoryModels, Test
         market = Market(LinearStockoutCost(5), Normal, 4, item, 0, 10, 0.1)
         @test state(market) == [0, 10, 0.1, 10, 0.1, 10, 0.1, 10, 0.1]
         InventoryModels.activate!(market, [])
-        demand = market.backorder
-        @test first(item.pull_orders) == (market => demand)
+        demand = market.last_demand
+        @test first(item.pull_orders) == (market => demand + market.backorder)
         InventoryModels.activate!(item, [0, 0])
         InventoryModels.activate!(sup,[])
         InventoryModels.dispatch!(sup)
@@ -134,18 +134,19 @@ using Revise, Distributions, InventoryModels, Test
         reset!(item)
         market2 = Market(LinearStockoutCost(5), CVNormal{0.4}, 2, item, Uniform(-10,0), [20,40,60,40])
         @test state(market2)[2:end] == [20,40]
+        backorder = market2.backorder
         InventoryModels.activate!(market2, [])
-        demand = market2.backorder
-        @test first(item.pull_orders) == (market2 => demand)
+        demand = market2.last_demand
+        @test first(item.pull_orders) == (market2 => demand + backorder)
         InventoryModels.activate!(item, [0, 0])
         InventoryModels.activate!(sup,[])
         InventoryModels.dispatch!(sup)
         InventoryModels.dispatch!(item)
+        @assert market2.backorder == backorder - 5 + demand 
         InventoryModels.dispatch!(market2)
         @test InventoryModels.reward!(sup) == 0
         @test InventoryModels.reward!(item) == 0
-        @test InventoryModels.reward!(market2) == -5*(demand-5)
-        @test state(market2) == [(demand-5), 40, 60]
+        @test -5*(market2.backorder) == InventoryModels.reward!(market2)
         reset!(market2)
         @test state(market2)[2:end] == [20,40]
     end
@@ -230,7 +231,7 @@ using Revise, Distributions, InventoryModels, Test
         @test state_size(is) == length(state(is)) == 0+0+0+0+1+1+1+0+2+21+1+11
         @test action_size(is) == 10
 
-        is2 = sl_sip(1,10,100,0.,0,[20,40,60,40])
+        is2 = sl_sip(1,10,100,0.,0,[20,40,60,40], 0.0)
         @test state(is2) == [0,20,40,60,40,0]
         is2([14,70])
         @test reward(is2) == -(100 + 0 + 50*1)
@@ -244,6 +245,6 @@ using Revise, Distributions, InventoryModels, Test
         @test state(is2) == [0,0,0,0,0, 14]
         reset!(is2)
         @test state(is2) == [0,20,40,60,40,0]
-        @test test_policy(sl_sip(1,10,100,0.25,0,[20,40,60,40]), [14,70,29,141,58,114,28,53], 10000) ≈ -363 atol = 2
+        @test test_policy(sl_sip(1,10,100,0.25,0,[20,40,60,40], 0.0), [14,70,29,141,58,114,28,53], 10000) ≈ -363 atol = 2
     end
 end
