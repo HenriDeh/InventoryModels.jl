@@ -1,6 +1,8 @@
 module InventoryModels
 
-using Distributions, DataStructures, MacroTools, Base.Iterators
+using Distributions, DataStructures, MacroTools, Base.Iterators, Reexport
+include("Scarf/Scarf.jl")
+@reexport using .Scarf
 const NumDist = Union{Number, Distribution}
 const State = Union{NumDist, AbstractVector{<:NumDist}}
 
@@ -26,5 +28,5 @@ include("cvnormal.jl")
 include("inventory_system.jl")
 include("utils.jl")
 include("zoo.jl")
-
+include("Scarf/interface.jl")
 end

@@ -1,13 +1,15 @@
 module Scarf
 
 using Distributions, SpecialFunctions
-export Instance, backward_SDP
+export Instance, scarf_SDP
+
 mutable struct Instance{T <: Real}
     holding_cost::T
     backorder_cost::T
     setup_cost::T
     production_cost::T
     lead_time::Int
+    gamma::T
     backlog::Bool
     demand_forecasts::Vector{Normal{T}}
     lt_demand_forecasts::Vector{Normal{T}}
@@ -16,7 +18,7 @@ mutable struct Instance{T <: Real}
     S::Array{T,1}
 end
 
-function Instance(h,b,K,c,CV,LT,demands, backlog = one(CV))
+function Instance(h,b,K,c,CV,LT,demands, gamma = 1. ; backlog = one(CV))
     T = typeof(CV)
     dists = Normal{T}[]
     @assert b > c && b > h
@@ -36,7 +38,7 @@ function Instance(h,b,K,c,CV,LT,demands, backlog = one(CV))
     backlog = min(one(backlog), max(zero(backlog), backlog))
     S = fill(-Inf, length(dists))
     s = fill(-Inf, length(dists))
-    Instance{T}(h,b,K,c,LT,backlog, dists,lt_dists,length(dists), S, s)
+    Instance{T}(h,b,K,c,LT, gamma, backlog, dists,lt_dists,length(dists), S, s)
 end
 
 mutable struct Pwla{T}
@@ -96,7 +98,7 @@ function C(instance::Instance, x, t::Int, pwla::Pwla)
     S = instance.S[t]
     s = instance.s[t]
     q = x <= s ? S - x : 0.0
-    return production_cost(instance, q) + L(instance, x + q, t) + pwla(x + q)
+    return production_cost(instance, q) + L(instance, x + q, t) + instance.gamma*pwla(x + q)
 end
 
 function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
@@ -113,7 +115,7 @@ function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
     end
 end
 
-function backward_SDP(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
+function scarf_SDP(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
     H = instance.H
     λ = instance.lead_time
     meandemand = max(stepsize, mean(mean.(instance.demand_forecasts)))
