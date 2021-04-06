@@ -13,6 +13,6 @@ function Scarf.Instance(is::InventorySystem, gamma = 1.)
         leadtime =0
     end
     Instance(item.holding_cost.h, market.stockout_cost.b, supplier.order_cost.K, 
-        supplier.order_cost.c, cv(market.demand_dist), leadtime, market.forecasts,gamma, 
+        supplier.order_cost.c, cv(market.demand_dist), leadtime, rand.(market.forecast_reset[1].itr.xs), gamma, 
         backlog = !market.lostsales)
 end
