@@ -2,7 +2,7 @@ function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsa
     bom = BOMElement[]
     push!(bom, Supplier(K,c))
     if LT > 0
-        push!(bom, LeadTime(0, LT, last(bom)))
+        push!(bom, LeadTime(LT, 0, last(bom)))
     end
     push!(bom, Item(h, sSPolicy(), start_inventory, last(bom)))
     push!(bom, Market(b, CVNormal{CV}, length(μ), last(bom), 0, [μ; pad ? zero(μ) : μ], lostsales = lostsales))
@@ -13,7 +13,7 @@ function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::
     bom = BOMElement[]
     push!(bom, Supplier(K,c))
     if LT > 0
-        push!(bom, LeadTime(0, LT, last(bom)))
+        push!(bom, LeadTime(LT, 0, last(bom)))
     end
     push!(bom, Item(h, sSPolicy(), start_inventory, last(bom)))
     push!(bom, Market(b, CVNormal{CV}, horizon, last(bom), 0, μ, lostsales = lostsales))
