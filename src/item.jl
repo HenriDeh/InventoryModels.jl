@@ -62,10 +62,9 @@ end
 
 Send pull order to all sources according to the policy parameters given by `action` and returns nothing because `Item` does not have an action space. 
 """
-function activate!(item::Item, action)
-    actions = Iterators.partition(action, action_size(item.policy))
-    for (source, polparams) in zip(item.sources, actions)
-       pull!(source, item.policy(item, polparams...), item) 
+function activate!(item::Item, Qs::AbstractVector)
+    for (source, Q) in zip(item.sources, Qs)
+       pull!(source, Q, item) 
     end
     return nothing
 end

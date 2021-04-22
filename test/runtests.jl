@@ -52,7 +52,7 @@ using Revise, Distributions, InventoryModels, Test
         @test action_size(item) == 2
         @test state(item) == [item.onhand] == [0]
         @test InventoryModels.inventory_position(item) == 0
-        InventoryModels.activate!(item, [5,10])
+        InventoryModels.activate!(item, [item.policy(item,[5,10])])
         @test first(sup.pull_orders) == (item => 10)
         InventoryModels.dispatch!(sup)
         InventoryModels.dispatch!(item)
@@ -69,7 +69,7 @@ using Revise, Distributions, InventoryModels, Test
         @test action_size(item2) == 2
         @test state(item2) == [item2.onhand] == [0]
         @test InventoryModels.inventory_position(item2) == 0
-        InventoryModels.activate!(item2, [5,10])
+        InventoryModels.activate!(item2, [item2.policy(item2,[5,10])])
         @test first(lt2.pull_orders) == (item2 => 10)
         InventoryModels.activate!(lt2,[])
         InventoryModels.dispatch!(sup2)
@@ -81,7 +81,7 @@ using Revise, Distributions, InventoryModels, Test
         @test state(item2) == [item2.onhand] == [0]
         @test state(lt2) == [10]
         @test InventoryModels.inventory_position(item2) == 10
-        InventoryModels.activate!(item2, [4,10])
+        InventoryModels.activate!(item2, [item2.policy(item2,[4,10])])
         InventoryModels.activate!(lt2,[])
         @test first(lt2.pull_orders) == (item2 => 0)
         InventoryModels.dispatch!(sup2)
@@ -112,7 +112,7 @@ using Revise, Distributions, InventoryModels, Test
         InventoryModels.activate!(market, [])
         demand = market.last_demand
         @test first(item.pull_orders) == (market => demand + market.backorder)
-        InventoryModels.activate!(item, [0, 0])
+        InventoryModels.activate!(item, [item.policy(item,[0, 0])])
         InventoryModels.activate!(sup,[])
         InventoryModels.dispatch!(sup)
         InventoryModels.dispatch!(item)
@@ -139,7 +139,7 @@ using Revise, Distributions, InventoryModels, Test
         demand = market2.last_demand
         @test first(item.pull_orders) == (market2 => demand + backorder)
         @assert InventoryModels.inventory_position(item) == item.onhand - backorder
-        InventoryModels.activate!(item, [0, 0])
+        InventoryModels.activate!(item, [0])
         InventoryModels.activate!(sup,[])
         InventoryModels.dispatch!(sup)
         InventoryModels.dispatch!(item)
@@ -157,7 +157,7 @@ using Revise, Distributions, InventoryModels, Test
         comp2 = Item(LinearHoldingCost(1), sSPolicy(), 20, source)
         ass = Assembly(FixedLinearOrderCost(100,10), comp1 => 2, comp2 => 3)
         prod = Item(LinearHoldingCost(4), sSPolicy(), 0, ass)
-        InventoryModels.activate!(prod, [1, 5])
+        InventoryModels.activate!(prod, [prod.policy(prod,[1, 5])])
         InventoryModels.activate!(ass, [])
         InventoryModels.activate!(comp1, [])
         InventoryModels.activate!(comp2, [])
@@ -177,7 +177,7 @@ using Revise, Distributions, InventoryModels, Test
         @test InventoryModels.reward!(comp1) == -10
         @test InventoryModels.reward!(comp2) == -5
         
-        InventoryModels.activate!(prod, [6, 9])
+        InventoryModels.activate!(prod, [prod.policy(prod,[6, 9])])
         InventoryModels.activate!(ass, [])
         InventoryModels.activate!(comp1, [])
         InventoryModels.activate!(comp2, [])

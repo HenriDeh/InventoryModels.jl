@@ -25,8 +25,19 @@ function (is::InventorySystem)(action::AbstractVector)
     @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
     @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
     actions = Iterators.Stateful(action)
-    for (elemement, act_size) in zip(is.bom, action_size.(is.bom))
-        activate!(elemement, Iterators.take(actions, act_size))
+    quantity = IdDict{Item, Vector{Float64}}()
+    for element in is.bom
+        act_size = action_size(element)
+        if element isa Item
+            Qs = Float64[]
+            for polparams in partition(Iterators.take(actions, act_size), action_size(element.policy))
+                push!(Qs, element.policy(element, polparams...))
+            end
+            quantity[element] = Qs
+        end
+    end
+    for element in is.bom
+        activate!(element, get(quantity, element, 0))
     end
     for element in Iterators.reverse(is.bom)
         dispatch!(element)
