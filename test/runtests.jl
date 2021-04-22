@@ -1,7 +1,7 @@
 using Revise, Distributions, InventoryModels, Test
 
 @testset "InventoryModels.jl" begin
-    include("test/supplier.jl")
+    include("supplier.jl")
     include("leadtime.jl")
     include("item.jl")
     include("market.jl")

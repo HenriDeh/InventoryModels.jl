@@ -20,6 +20,7 @@ state(::Assembly) = Float64[]
 state_size(::Assembly) = 0
 action_size(::Assembly)::Int = 0
 print_state(::Assembly) = Pair{String, Float64}[]
+print_action(::Assembly) = Pair{String, Float64}[]
 
 function pull!(ass::Assembly, quantity::Number, issuer)
     @assert 0 == length(ass.pull_orders) "assembly received multiple orders"
@@ -73,4 +74,4 @@ end
 
 (f::LinearOrderCost)(ass::Assembly) = f.c*sum(values(ass.pull_orders))
 
-Base.show(io::IO, ass::Assembly{F}) where {F} = print("Assembly{",Base.typename(F),"}")
+Base.show(io::IO, ass::Assembly{F}) where {F} = print(io, "Assembly{",Base.typename(F),"}")

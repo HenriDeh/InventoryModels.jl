@@ -20,6 +20,7 @@ action_size(is::InventorySystem)::Int = sum(action_size.(is.bom))
 is_terminated(is::InventorySystem) = is.t > is.T
 reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, print_state.(is.bom))
+print_action(is::InventorySystem) = reduce(vcat, print_action.(is.bom))
 
 function (is::InventorySystem)(action::AbstractVector)
     @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
@@ -79,4 +80,4 @@ function topological_order(bom)
     return reverse(L)
 end
 
-Base.show(io::IO, is::InventorySystem) = print("InventorySystem(", is.T," periods, ", count(x->x isa Item, is.bom) ," items)")
+Base.show(io::IO, is::InventorySystem) = print(io, "InventorySystem(", is.T," periods, ", count(x->x isa Item, is.bom) ," items, (1x$(state_size(is))) state, ($(action_size(is))) action)")

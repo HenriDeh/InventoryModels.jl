@@ -37,6 +37,7 @@ function print_state(ma::Market)
     forecasts = [ma.name*" demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
     return ma.lostsales ? forecasts : [ma.name*" backorder" => ma.backorder ; forecasts]
 end
+print_action(::Market) = Pair{String, Float64}[]
 
 function pull!(::Market, ::Any...)
     nothing
@@ -82,4 +83,4 @@ mutable struct LinearStockoutCost{T}
 end
 (f::LinearStockoutCost)(ma::Market) = f.b*ma.backorder
 
-Base.show(io::IO, market::Market{D,F,S,Df,Db}) where {D,F,S,Df,Db} = print("Market{$D,",Base.typename(F),"}")
+Base.show(io::IO, market::Market{D,F,S,Df,Db}) where {D,F,S,Df,Db} = print(io, "Market{$D,",Base.typename(F),"}")

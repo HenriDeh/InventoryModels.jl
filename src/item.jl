@@ -35,7 +35,10 @@ state(item::Item) = [item.onhand]
 state_size(::Item) = 1
 action_size(item::Item)::Int = length(item.sources)*action_size(item.policy)
 print_state(item::Item) = [item.name*" on hand" => item.onhand]
-
+function print_action(item::Item)
+    as = action_size(item.policy)
+    reduce(vcat, [item.name .* " " .* print_action(item.policy) .* " for " .* source.name for source in item.sources])
+end
 """
     pull!(item::Item, Pair{Any, Number})
 
@@ -124,4 +127,4 @@ mutable struct LinearHoldingCost{T}
 end
 (f::LinearHoldingCost)(item::Item) = f.h*item.onhand
 
-Base.show(io::IO, item::Item{Dl, F, S, P}) where {Dl,F,S,P} = print("Item{", Base.typename(F), ",", Base.typename(P),"}")
+Base.show(io::IO, item::Item{Dl, F, S, P}) where {Dl,F,S,P} = print(io, "Item{", Base.typename(F), ",", Base.typename(P),"}")

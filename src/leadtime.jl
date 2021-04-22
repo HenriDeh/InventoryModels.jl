@@ -31,7 +31,7 @@ state(lt::LeadTime) = vec(lt.onorder)
 state_size(lt::LeadTime) = lt.leadtime
 action_size(::LeadTime)::Int = 0
 print_state(lt::LeadTime) = [lt.name*" on order t-$i" => oo for (i, oo) in enumerate(lt.onorder)]
-
+print_action(::LeadTime) = Pair{String, Float64}[]
 
 function pull!(lt::LeadTime, quantity, issuer)
     @assert 0 == length(lt.pull_orders) "lead time received multiple orders"
@@ -70,4 +70,4 @@ children(lt::LeadTime) = (lt.source,)
 #Defined in item.jl
 (f::LinearHoldingCost)(lt::LeadTime) = f.h*sum(lt.onorder)
 
-Base.show(io::IO, lt::LeadTime{F,D,S}) where {F,D,S} = print("LeadTime{", Base.typename(F),"}")
+Base.show(io::IO, lt::LeadTime{F,D,S}) where {F,D,S} = print(io, "LeadTime{", Base.typename(F),"}")
