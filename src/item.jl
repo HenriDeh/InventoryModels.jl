@@ -34,6 +34,7 @@ end
 state(item::Item) = [item.onhand]
 state_size(::Item) = 1
 action_size(item::Item)::Int = length(item.sources)*action_size(item.policy)
+print_state(item::Item) = [item.name*" on hand" => item.onhand]
 
 """
     pull!(item::Item, Pair{Any, Number})

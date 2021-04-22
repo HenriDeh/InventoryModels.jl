@@ -20,6 +20,7 @@ end
 state(::Supplier) = Float64[]
 state_size(::Supplier) = 0
 action_size(::Supplier)::Int = 0
+print_state(::Supplier) = Pair{String, Float64}[]
 
 function pull!(sup::Supplier, quantity::Number, issuer)
     @assert 0 == length(sup.pull_orders) "supplier received multiple orders"

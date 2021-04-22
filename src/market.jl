@@ -32,6 +32,7 @@ end
 state(ma::Market) = ma.lostsales ? ma.forecasts : [ma.backorder; ma.forecasts]
 state_size(ma::Market) = (ma.lostsales != 1) + ma.horizon*length(ma.forecast_reset)
 action_size(::Market)::Int = 0
+print_state(ma::Market) = ma.lostsales ? [ma.name*" dem t + $(i-1)" => d for (i,d) in enumerate(ma.forecasts)] : [ma.name*" backorder" => ma.backorder ;[ma.name*" dem t + $(i-1)" => d for (i,d) in enumerate(ma.forecasts)]]
 
 function pull!(::Market, ::Any...)
     nothing

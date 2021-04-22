@@ -19,6 +19,7 @@ end
 state(::Assembly) = Float64[]
 state_size(::Assembly) = 0
 action_size(::Assembly)::Int = 0
+print_state(::Assembly) = Pair{String, Float64}[]
 
 function pull!(ass::Assembly, quantity::Number, issuer)
     @assert 0 == length(ass.pull_orders) "assembly received multiple orders"
