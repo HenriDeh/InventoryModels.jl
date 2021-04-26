@@ -1,7 +1,7 @@
 module Scarf
 
 using Distributions, SpecialFunctions
-export Instance, scarf_SDP
+export Instance, DP_sS
 
 mutable struct Instance{T <: Real}
     holding_cost::T
@@ -115,7 +115,7 @@ function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
     end
 end
 
-function scarf_SDP(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
+function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
     H = instance.H
     λ = instance.lead_time
     meandemand = max(stepsize, mean(mean.(instance.demand_forecasts)))
