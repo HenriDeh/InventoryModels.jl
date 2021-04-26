@@ -64,4 +64,4 @@ mutable struct LinearOrderCost{T2}
 end
 (f::LinearOrderCost)(sup::Supplier) = f.c*sum(values(sup.pull_orders))
 
-Base.show(io::IO, sup::Supplier{F}) where {F} = print(io, "Supplier{", Base.typename(F),"}")
+Base.show(io::IO, sup::Supplier{F}) where {F} = print(io, "Supplier($(sup.name), $F)")

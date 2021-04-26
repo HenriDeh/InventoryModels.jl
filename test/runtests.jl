@@ -7,5 +7,5 @@ using Revise, Distributions, InventoryModels, Test
     include("market.jl")
     include("assembly.jl")
     include("inventory_system.jl")
-    include("constraints.jl")
+    #include("constraints.jl")
 end

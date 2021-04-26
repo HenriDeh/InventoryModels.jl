@@ -27,18 +27,17 @@
     @test state(market) != [0, 10, 0.1, 10, 0.1, 10, 0.1, 10, 0.1]
     reset!(sup)
     reset!(item)
-    market2 = Market(LinearStockoutCost(5), CVNormal{0.4}, 2, item, Uniform(-10,0), [20,40,60,40])
+    market2 = Market(LinearStockoutCost(5), CVNormal{0.4}, 2, item, 10, [20,40,60,40])
     @test state(market2)[2:end] == [20,40]
-    backorder = market2.backorder
     InventoryModels.activate!(market2, [])
     demand = market2.last_demand
-    @test first(item.pull_orders) == (market2 => demand + backorder)
-    @assert InventoryModels.inventory_position(item) == item.onhand - backorder
+    @test first(item.pull_orders) == (market2 => demand + 10)
+    @test InventoryModels.inventory_position(item) == item.onhand - 10
     InventoryModels.activate!(item, [0])
     InventoryModels.activate!(sup,[])
     InventoryModels.dispatch!(sup)
     InventoryModels.dispatch!(item)
-    @assert market2.backorder == backorder - 5 + demand 
+    @test market2.backorder == 10 - 5 + demand 
     InventoryModels.dispatch!(market2)
     @test InventoryModels.reward!(sup) == 0
     @test InventoryModels.reward!(item) == 0

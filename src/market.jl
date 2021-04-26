@@ -83,4 +83,4 @@ mutable struct LinearStockoutCost{T}
 end
 (f::LinearStockoutCost)(ma::Market) = f.b*ma.backorder
 
-Base.show(io::IO, market::Market{D,F,S,Df,Db}) where {D,F,S,Df,Db} = print(io, "Market{$D,",Base.typename(F),"}")
+Base.show(io::IO, market::Market{D,F,S,Df,Db}) where {D,F,S,Df,Db} = print(io, "Market($(market.name), $D, $F)")

@@ -1,7 +1,8 @@
-mutable struct Assembly{F} <:BOMElement
+mutable struct Assembly{F, C <: Tuple} <:BOMElement
     production_cost::F
     capacity::Float64
-    components::IdDict{Item,Float64}
+    components::C
+    requirements::IdDict{Item, Float64}
     pull_orders::IdDict{Any,Float64}
     name::String
 end
@@ -9,7 +10,8 @@ end
 function Assembly(production_cost, components::Pair{<:Item, <:Number}...; capacity = Inf, name = "")
     @assert hasmethod(production_cost, Tuple{Assembly}) "production_cost must have a method with (::Assembly) signature"
     @assert length(components) >= 1 "Assembly must have at least one component"
-    Assembly(production_cost, Float64(capacity), IdDict{Item, Float64}(components), IdDict{Any,Float64}(), name)
+    comps = tuple([first(pair) for pair in components]...)
+    Assembly(production_cost, Float64(capacity), comps, IdDict{Item, Float64}(components), IdDict{Any,Float64}(), name)
 end
 
 function Assembly(fixed_order_cost::Number, variable_order_cost::Number, components::Pair{<:Item, <:Number}...; capacity = Inf, name = "" )
@@ -35,19 +37,19 @@ end
 
 function activate!(ass::Assembly, action)
     destination, quantity = first(ass.pull_orders)
-    for (component, required) in ass.components
+    for (component, required) in ass.requirements
         pull!(component, quantity*required, ass)
     end
     nothing
 end
 
 function dispatch!(ass::Assembly)
-    destination = first(filter(i -> !(i in keys(ass.components)), keys(ass.pull_orders)))
+    destination = first(filter(i -> !(i in ass.components), keys(ass.pull_orders)))
     quantity = ass.pull_orders[destination]
-    for (component, required) in ass.components
+    for (component, required) in ass.requirements
         quantity = min(quantity, ass.pull_orders[component]/required)
     end
-    for (component, required) in ass.components
+    for (component, required) in ass.requirements
         excess = pop!(ass.pull_orders, component) - required*quantity
         push!(component, excess, ass)
     end 
@@ -64,7 +66,7 @@ end
 
 reset!(::Assembly) = nothing
 
-children(ass::Assembly) = keys(ass.components)
+children(ass::Assembly) = ass.components
 
 #cost functions defined in supplier.jl
 function (f::FixedLinearOrderCost)(ass::Assembly) 
@@ -74,4 +76,4 @@ end
 
 (f::LinearOrderCost)(ass::Assembly) = f.c*sum(values(ass.pull_orders))
 
-Base.show(io::IO, ass::Assembly{F}) where {F} = print(io, "Assembly{",Base.typename(F),"}")
+Base.show(io::IO, ass::Assembly{F}) where {F} = print(io, "Assembly($(ass.name), $F)")

@@ -17,6 +17,7 @@ export Assembly
 export CVNormal, cv
 export InventorySystem, state, state_size, action_size, reward, reset!, is_terminated, print_state, print_action
 export sl_sip
+export RessourceConstraint
 include("item.jl")
 include("policies.jl")
 include("supplier.jl")
@@ -24,6 +25,7 @@ include("leadtime.jl")
 include("market.jl")
 include("assembly.jl")
 include("cvnormal.jl")
+include("constraints.jl")
 include("inventory_system.jl")
 include("utils.jl")
 include("zoo.jl")

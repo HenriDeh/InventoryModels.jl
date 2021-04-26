@@ -4,7 +4,7 @@
     comp2 = Item(LinearHoldingCost(1), sSPolicy(), 20, source)
     ass = Assembly(FixedLinearOrderCost(100,10), comp1 => 2, comp2 => 3)
     prod = Item(LinearHoldingCost(4), sSPolicy(), 0, ass)
-    InventoryModels.activate!(prod, [prod.policy(prod,[1, 5])])
+    InventoryModels.activate!(prod, [5])
     InventoryModels.activate!(ass, [])
     InventoryModels.activate!(comp1, [])
     InventoryModels.activate!(comp2, [])

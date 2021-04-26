@@ -127,4 +127,4 @@ mutable struct LinearHoldingCost{T}
 end
 (f::LinearHoldingCost)(item::Item) = f.h*item.onhand
 
-Base.show(io::IO, item::Item{Dl, F, S, P}) where {Dl,F,S,P} = print(io, "Item{", Base.typename(F), ",", Base.typename(P),"}")
+Base.show(io::IO, item::Item{Dl, F, S, P}) where {Dl,F,S,P} = print(io, "Item($(item.name), $F, $P)")

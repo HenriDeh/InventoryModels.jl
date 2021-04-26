@@ -24,10 +24,9 @@
     is = InventorySystem(52, bom)
     for (i, el) in enumerate(is.bom)
         for child in InventoryModels.children(el)
-            @test child in @view bom_s[i:end]
+            @test child in @view is.bom[i:end]
         end
     end
-    @test is.bom == bom_s
     @test state_size(is) == length(state(is)) == 0+0+0+0+1+1+1+0+2+21+1+11
     @test action_size(is) == 10
 

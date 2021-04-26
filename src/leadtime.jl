@@ -70,4 +70,4 @@ children(lt::LeadTime) = (lt.source,)
 #Defined in item.jl
 (f::LinearHoldingCost)(lt::LeadTime) = f.h*sum(lt.onorder)
 
-Base.show(io::IO, lt::LeadTime{F,D,S}) where {F,D,S} = print(io, "LeadTime{", Base.typename(F),"}")
+Base.show(io::IO, lt::LeadTime{F,D,S}) where {F,D,S} = print(io, "LeadTime($(lt.name), $F)")

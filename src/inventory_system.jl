@@ -2,16 +2,14 @@ mutable struct InventorySystem
     t::Int
     T::Int
     bom::Vector{BOMElement}
+    constraints::Vector{AbstractConstraint}
     reward::Float64
 end
 
-function InventorySystem(T, bom::Vector{BOMElement})
+function InventorySystem(T, bom::Vector{BOMElement}, constraints = AbstractConstraint[])
     maxT = T == Inf ? typemax(Int) : Int(T)
     bom_to = topological_order(bom)
-    InventorySystem(1, maxT, bom_to, 0.)
-end
-function InventorySystem(T, bom::BOMElement...)
-    InventorySystem(T, [bom...])
+    InventorySystem(1, maxT, bom_to, constraints, 0.)
 end
 
 state(is::InventorySystem) = reduce(vcat, state.(is.bom))
@@ -40,6 +38,9 @@ function (is::InventorySystem)(action::AbstractVector)
     for element in is.bom
         activate!(element, get(quantity, element, 0))
     end
+    for cons in is.constraints
+        cons()
+    end
     for element in Iterators.reverse(is.bom)
         dispatch!(element)
     end
@@ -57,7 +58,7 @@ end
 
 function topological_order(bom)
     L = eltype(bom)[]
-    unmarked = Set(bom)
+    unmarked = copy(bom)
     tempmarked = Set()
     permarked = Set()
     function visit(node)
