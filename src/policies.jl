@@ -6,6 +6,7 @@ end
 (p::sSPolicy)(item::Item, v::AbstractVector) = p(item, v...)
 
 action_size(::sSPolicy) = 2
+print_action(::sSPolicy) = ["s", "S"]
 
 struct RQPolicy end
 
@@ -15,6 +16,7 @@ end
 (p::RQPolicy)(item::Item, v::AbstractVector) = p(item, v...)
 
 action_size(::RQPolicy) = 2
+print_action(::RQPolicy) = ["R", "Q"]
 
 struct QPolicy end
 
@@ -24,14 +26,16 @@ end
 (p::QPolicy)(item::Item, v::AbstractVector) = p(item, v...)
 
 action_size(::QPolicy) = 1
+print_action(::QPolicy) = ["Q"]
 
-struct BQPolicy end
+struct YQPolicy end
 
-function (::BQPolicy)(::Item, B, Q)
-    (B > 0)*Q    
+function (::YQPolicy)(::Item, Y, Q)
+    (Y > 0)*Q    
 end
-(p::BQPolicy)(item::Item, v::AbstractVector) = p(item, v...)
-action_size(::BQPolicy) = 2
+(p::YQPolicy)(item::Item, v::AbstractVector) = p(item, v...)
+action_size(::YQPolicy) = 2
+print_action(::YQPolicy) = ["Y", "Q"]
 
 #(R, nQ) 
 #StaticStaticPolicy

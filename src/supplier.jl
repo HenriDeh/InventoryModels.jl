@@ -21,6 +21,7 @@ state(::Supplier) = Float64[]
 state_size(::Supplier) = 0
 action_size(::Supplier)::Int = 0
 print_state(::Supplier) = Pair{String, Float64}[]
+print_action(::Supplier) = Pair{String, Float64}[]
 
 function pull!(sup::Supplier, quantity::Number, issuer)
     @assert 0 == length(sup.pull_orders) "supplier received multiple orders"
@@ -63,4 +64,4 @@ mutable struct LinearOrderCost{T2}
 end
 (f::LinearOrderCost)(sup::Supplier) = f.c*sum(values(sup.pull_orders))
 
-Base.show(io::IO, sup::Supplier{F}) where {F} = print("Supplier{", Base.typename(F),"}")
+Base.show(io::IO, sup::Supplier{F}) where {F} = print(io, "Supplier($(sup.name), $F)")

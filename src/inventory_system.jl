@@ -2,16 +2,14 @@ mutable struct InventorySystem
     t::Int
     T::Int
     bom::Vector{BOMElement}
+    constraints::Vector{AbstractConstraint}
     reward::Float64
 end
 
-function InventorySystem(T, bom::Vector{BOMElement})
+function InventorySystem(T, bom::Vector{BOMElement}, constraints = AbstractConstraint[])
     maxT = T == Inf ? typemax(Int) : Int(T)
     bom_to = topological_order(bom)
-    InventorySystem(1, maxT, bom_to, 0.)
-end
-function InventorySystem(T, bom::BOMElement...)
-    InventorySystem(T, [bom...])
+    InventorySystem(1, maxT, bom_to, constraints, 0.)
 end
 
 state(is::InventorySystem) = reduce(vcat, state.(is.bom))
@@ -20,6 +18,7 @@ action_size(is::InventorySystem)::Int = sum(action_size.(is.bom))
 is_terminated(is::InventorySystem) = is.t > is.T
 reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, print_state.(is.bom))
+print_action(is::InventorySystem) = reduce(vcat, print_action.(is.bom))
 
 function (is::InventorySystem)(action::AbstractVector)
     @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
@@ -39,6 +38,9 @@ function (is::InventorySystem)(action::AbstractVector)
     for element in is.bom
         activate!(element, get(quantity, element, 0))
     end
+    for cons in is.constraints
+        cons()
+    end
     for element in Iterators.reverse(is.bom)
         dispatch!(element)
     end
@@ -56,7 +58,7 @@ end
 
 function topological_order(bom)
     L = eltype(bom)[]
-    unmarked = Set(bom)
+    unmarked = copy(bom)
     tempmarked = Set()
     permarked = Set()
     function visit(node)
@@ -79,4 +81,4 @@ function topological_order(bom)
     return reverse(L)
 end
 
-Base.show(io::IO, is::InventorySystem) = print("InventorySystem(", is.T," periods, ", count(x->x isa Item, is.bom) ," items)")
+Base.show(io::IO, is::InventorySystem) = print(io, "InventorySystem(", is.T," periods, ", count(x->x isa Item, is.bom) ," items, (1x$(state_size(is))) state, ($(action_size(is))) action)")
