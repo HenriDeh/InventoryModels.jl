@@ -1,12 +1,12 @@
 mutable struct InventorySystem
     t::Int
     T::Int
-    bom::Vector{BOMElement}
+    bom::Vector{AbstractItem}
     constraints::Vector{AbstractConstraint}
     reward::Float64
 end
 
-function InventorySystem(T, bom::Vector{BOMElement}, constraints = AbstractConstraint[])
+function InventorySystem(T, bom::Vector{<:AbstractItem}, constraints = AbstractConstraint[])
     maxT = T == Inf ? typemax(Int) : Int(T)
     bom_to = topological_order(bom)
     InventorySystem(1, maxT, bom_to, constraints, 0.)
@@ -24,25 +24,23 @@ function (is::InventorySystem)(action::AbstractVector)
     @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
     @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
     actions = Iterators.Stateful(action)
-    quantity = IdDict{Item, Vector{Float64}}()
-    for element in is.bom
-        act_size = action_size(element)
-        if element isa Item
-            Qs = Float64[]
-            for polparams in partition(Iterators.take(actions, act_size), action_size(element.policy))
-                push!(Qs, element.policy(element, polparams...))
-            end
-            quantity[element] = Qs
+    quantity = IdDict{AbstractItem, Vector{Float64}}()
+    for item in is.bom
+        act_size = action_size(item)
+        Qs = Float64[]
+        for polparams in partition(Iterators.take(actions, act_size), action_size(item.policy))
+            push!(Qs, item.policy(item, polparams...))
         end
+        quantity[item] = Qs
     end
-    for element in is.bom
-        activate!(element, get(quantity, element, 0))
+    for item in is.bom
+        item(quantity[item])
     end
     for cons in is.constraints
         cons()
     end
-    for element in Iterators.reverse(is.bom)
-        dispatch!(element)
+    for item in Iterators.reverse(is.bom)
+        dispatch!(item)
     end
     is.t += 1
     is.reward = sum(reward!.(is.bom)) 
