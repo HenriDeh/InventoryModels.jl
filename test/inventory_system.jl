@@ -1,20 +1,12 @@
 @testset "inventory_system.jl" begin
-    LOC = FixedLinearOrderCost
-    LHC = LinearHoldingCost
-    LSC = LinearStockoutCost
-    sup1 = Supplier(LOC(100,1))
-    sup2 = deepcopy(sup1)
-    sup3 = deepcopy(sup1)
-    sup4 = deepcopy(sup1)
-    lt2 = LeadTime(1, 0, sup2)
-    item2 = Item(LHC(1), sSPolicy(), 0, lt2, sup3)
-    item3 = Item(LHC(1), sSPolicy(), 0, sup1)
-    ass1 = Assembly(LOC(100,1), item3 => 2, item2 => 4)
-    lt1 = LeadTime(2, 0, ass1)
-    ma2 = Market(LSC(5), Normal, 10, item3, 0, 0, 1)
-    item1 = Item(LHC(5), sSPolicy(), 0, lt1, sup4)
-    ma1 = Market(LSC(5), CVNormal{0.4}, 10, item1, 0, 0)
-    bom = [sup1, sup2, sup3, sup4, lt2, item2, item3, ass1, lt1, ma2, item1, ma1]
+    item1 = Item(Inventory(1, 11), Supplier(100,1), Supplier(10,1, leadtime = LeadTime(1, 9)), name = "item1")
+    item2 = Item(Inventory(1, 12), Supplier(100,1), name = "item2")
+    item3 = Item(Inventory(1, 13), Supplier(100,1), name = "item3")
+    item4 = Item(Inventory(10,14), Assembly(80,8, item1 => 2, item2 => 4), name = "item4")
+    item5 = Item(Inventory(10,15), Assembly(90,2, item2 => 4, item3 =>1), name = "item5")
+    item6 = EndProduct(Market(5, Normal, 4, 0, 10, 0.0), Inventory(100,52), Assembly(1280, 1, item4=>1, item5=>2), name = "item6")
+
+    bom = [item3, item2, item5, item4, item6, item1]
     bom_s = InventoryModels.topological_order(bom)
     for (i, el) in enumerate(bom_s)
         for child in InventoryModels.children(el)
@@ -27,9 +19,10 @@
             @test child in @view is.bom[i:end]
         end
     end
-    @test state_size(is) == length(state(is)) == 0+0+0+0+1+1+1+0+2+21+1+11
-    @test action_size(is) == 10
-
+    @test state_size(is) == length(state(is)) == 2+1+1+1+1+1+1+8
+    @test state(is) == [0,10,0,10,0,10,0,10,0,52,15,13,14,12,11,9]
+    @test action_size(is) == 6*2 + 2
+    
     is2 = sl_sip(1,10,100,0.,0,[20,40,60,40], 0.0)
     @test state(is2) == [0,20,40,60,40,0]
     is2([14,70])

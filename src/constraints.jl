@@ -37,4 +37,6 @@ struct RessourceConstraintSetup <: AbstractConstraint
     variablecosts::Dict{Any,Float64}
     setupcosts::Dict{Any,Float64}
 end
+
+capacity constraint (inventories)
 =#
