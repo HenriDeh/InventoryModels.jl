@@ -56,7 +56,7 @@ function reset!(e::EndProduct)
         reset!(source)
     end
     if e.inventory.onhand < 0
-        e.market.backorder -= inventory.onhand
+        e.market.backorder -= e.inventory.onhand
         e.inventory.onhand = 0
     end
     return nothing
