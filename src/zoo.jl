@@ -1,23 +1,20 @@
-function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, pad = true, policy = sSPolicy)
-    bom = BOMElement[]
-    push!(bom, Supplier(K,c))
-    if LT > 0
-        push!(bom, LeadTime(LT, 0, last(bom)))
-    end
-    push!(bom, Item(h, policy(), start_inventory, last(bom)))
-    push!(bom, Market(b, CVNormal{CV}, length(μ), last(bom), 0, [μ; pad ? zero(μ) : μ], lostsales = lostsales))
-    InventorySystem(length(μ), bom)
+function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, pad = true, policy = sSPolicy())
+    item = EndProduct(
+        Market(b, CVNormal{CV}, length(μ), 0, [μ; pad ? zero(μ) : μ], lostsales = lostsales),
+        Inventory(h, start_inventory),
+        Supplier(K,c, leadtime = LeadTime(LT, 0)),
+        policy = policy
+    )
+    InventorySystem(length(μ), [item])
 end
 
-function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::Int = 0; lostsales = false, policy = sSPolicy)
-    bom = BOMElement[]
-    push!(bom, Supplier(K,c))
-    if LT > 0
-        push!(bom, LeadTime(LT, 0, last(bom)))
-    end
-    push!(bom, Item(h, policy(), start_inventory, last(bom)))
-    push!(bom, Market(b, CVNormal{CV}, horizon, last(bom), 0, μ, lostsales = lostsales))
-    InventorySystem(horizon, bom)
+function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::Int = 0; lostsales = false, policy = sSPolicy())
+    item = EndProduct(
+        Market(b, CVNormal{CV}, horizon, 0, μ, lostsales = lostsales),
+        Inventory(h, start_inventory),
+        Supplier(K,c, leadtime = LeadTime(LT, 0))
+    )
+    InventorySystem(length(μ), [item])
 end
 
 """
@@ -25,6 +22,7 @@ InventoryModels.assembly10(holding_costs = ones(10), fixed_costs = 100*ones(10),
 
 order capacities are decentralized, this does not implements the "shared ressources" generalization of Thevenin et al.
 """
+#=
 function assembly10(;holding_costs, fixed_costs, variable_costs, leadtimes, backorder_cost, demand_forecast, CV, order_capacities = fill(Inf, 10), inventory_capacities = fill(Inf, 10), initlevels = zeros(10))
     suppliers = []
     lts = []
@@ -117,3 +115,4 @@ function general10(;holding_costs, fixed_costs, variable_costs, leadtimes, backo
     end
     InventorySystem(minimum(length.(demand_forecasts)), suppliers..., lts..., assembs..., items..., markets...)
 end
+=#
