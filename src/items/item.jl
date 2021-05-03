@@ -12,8 +12,11 @@ end
 state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
 state_size(e::Item) = state_size(e.inventory) + sum(state_size.(e.sources)) 
 action_size(e::Item) = action_size(e.policy)*length(e.sources)
-print_state(e::Item) = [e.name*" "*print_state(e.inventory); e.name.*" ".*print_state.(e.sources)]
-print_action(e::Item) = reduce(vcat, [e.name.*print_action(e.policy).*print_action(source) for source in e.sources])
+function print_state(e::Item)
+    ps = [print_state(e.inventory); reduce(vcat, print_state.(e.sources))]
+    return [e.name*" "*first(p) => last(p) for p in ps]    
+end
+print_action(e::Item) = reduce(vcat, [e.name.*" ".*print_action(e.policy).*print_action(source) for source in e.sources])
 
 function pull!(e::Item, quantity::Number, issuer)
     pull!(e.inventory, quantity, issuer)
