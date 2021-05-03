@@ -12,7 +12,8 @@ function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::
     item = EndProduct(
         Market(b, CVNormal{CV}, horizon, 0, μ, lostsales = lostsales),
         Inventory(h, start_inventory),
-        Supplier(K,c, leadtime = LeadTime(LT, 0))
+        Supplier(K,c, leadtime = LeadTime(LT, 0)),
+        policy = policy
     )
     InventorySystem(length(μ), [item])
 end
