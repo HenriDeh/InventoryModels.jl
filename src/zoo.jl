@@ -15,7 +15,7 @@ function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::
         Supplier(K,c, leadtime = LeadTime(LT, 0)),
         policy = policy
     )
-    InventorySystem(length(μ), [item])
+    InventorySystem(horizon, [item])
 end
 
 """
