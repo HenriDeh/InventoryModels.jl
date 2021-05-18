@@ -79,4 +79,4 @@ function topological_order(bom)
     return reverse(L)
 end
 
-Base.show(io::IO, is::InventorySystem) = print(io, "InventorySystem(", is.T," periods, ", count(x->x isa Item, is.bom) ," items, (1x$(state_size(is))) state, ($(action_size(is))) action)")
+Base.show(io::IO, is::InventorySystem) = print(io, "InventorySystem(", is.T," periods, ", length(is.bom) ," items, (1x$(state_size(is))) state, ($(action_size(is))) action)")
