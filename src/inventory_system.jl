@@ -38,15 +38,19 @@ function (is::InventorySystem)(action::AbstractVector)
     @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
     @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
     quantity = compute_quantities(is, action)
+    #Stage: PreActStage
     for item in is.bom
         item(quantity[item])
     end
+    #Stage: PreConsStage
     for cons in is.constraints
         cons()
     end
+    #Stage: PreDispatchStage
     for item in Iterators.reverse(is.bom)
         dispatch!(item)
     end
+    #Stage: PreRewardStage
     is.t += 1
     is.reward = sum(reward!.(is.bom))
 end
