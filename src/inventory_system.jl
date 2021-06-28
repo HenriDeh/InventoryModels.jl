@@ -20,9 +20,7 @@ reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, print_state.(is.bom))
 print_action(is::InventorySystem) = reduce(vcat, print_action.(is.bom))
 
-function (is::InventorySystem)(action::AbstractVector)
-    @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
-    @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
+function compute_quantities(is,action)
     actions = Iterators.Stateful(action)
     quantity = IdDict{AbstractItem, Vector{Float64}}()
     for item in is.bom
@@ -33,6 +31,13 @@ function (is::InventorySystem)(action::AbstractVector)
         end
         quantity[item] = Qs
     end
+    return quantity
+end
+
+function (is::InventorySystem)(action::AbstractVector)
+    @assert !is_terminated(is) "InventorySystem is at terminal state, please use reset!(::InventorySystem)"
+    @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
+    quantity = compute_quantities(is, action)
     for item in is.bom
         item(quantity[item])
     end
@@ -43,8 +48,7 @@ function (is::InventorySystem)(action::AbstractVector)
         dispatch!(item)
     end
     is.t += 1
-    is.reward = sum(reward!.(is.bom)) 
-    return 
+    is.reward = sum(reward!.(is.bom))
 end
 
 (is::InventorySystem)(action::AbstractMatrix) = is(vec(action))
