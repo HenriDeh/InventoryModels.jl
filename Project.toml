@@ -1,7 +1,7 @@
 name = "InventoryModels"
 uuid = "be94c240-e620-4455-b2c0-7979cca4862a"
 authors = ["Dehaybe <henri.dehaybe@uclouvain.be>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
