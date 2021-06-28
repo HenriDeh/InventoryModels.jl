@@ -26,4 +26,25 @@
     @test InventoryModels.inventory_position(market) == -24
     reset!(market)
     @test state(market) == [10, 20, 0.0, 40, 0.0, 60, 0.0, 40, 0.0]
+
+    @testset "warmup" begin
+        market = Market(5, Normal, 4, 0, [20,40,60,40], 0.0, warmup = 2)
+        @test state_size(market) == 9
+        @test state(market) == [0, 20, 0.0, 40, 0.0, 60, 0.0, 40, 0.0]
+        @test InventoryModels.inventory_position(market) == 0
+        @test InventoryModels.demand!(market) == 0
+        @test InventoryModels.reward!(market) == 0
+        @test state(market) == [0, 20, 0.0, 40, 0.0, 60, 0.0, 40, 0.0]
+        @test InventoryModels.inventory_position(market) == 0
+        @test InventoryModels.demand!(market) == 0
+        @test InventoryModels.reward!(market) == 0
+        @test state(market) == [0, 20, 0.0, 40, 0.0, 60, 0.0, 40, 0.0]
+        @test InventoryModels.inventory_position(market) == 0
+        @test InventoryModels.demand!(market) == 20
+        push!(market, 10, [])
+        @test InventoryModels.reward!(market) == -10*5
+        reset!(market)
+        @test state(market) == [0, 20, 0.0, 40, 0.0, 60, 0.0, 40, 0.0]
+        @test market.t == 1                      
+    end
 end
