@@ -22,7 +22,7 @@ function print_state(e::EndProduct)
     return [e.name*" "*first(p) => last(p) for p in ps] 
 end
 function print_action(e::EndProduct) 
-    reduce(vcat, [e.name.*" ".*print_action(e.policy).*print_action(source) for source in e.sources])
+    reduce(vcat, [e.name .* " " .* print_action(e.policy) .* " " .* source.name for source in e.sources])
 end
 
 function pull!(e::EndProduct, quantity::Number, issuer)

@@ -16,7 +16,7 @@ function print_state(e::Item)
     ps = [print_state(e.inventory); reduce(vcat, print_state.(e.sources))]
     return [e.name*" "*first(p) => last(p) for p in ps]    
 end
-print_action(e::Item) = reduce(vcat, [e.name.*" ".*print_action(e.policy).*print_action(source) for source in e.sources])
+print_action(e::Item) = reduce(vcat, [e.name .* " " .* print_action(e.policy) .* " " .* source.name for source in e.sources])
 
 function pull!(e::Item, quantity::Number, issuer)
     pull!(e.inventory, quantity, issuer)
