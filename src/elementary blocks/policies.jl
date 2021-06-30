@@ -1,7 +1,7 @@
 struct sSPolicy end 
 function (::sSPolicy)(item::AbstractItem, s, S) 
     ip = inventory_position(item) 
-    (ip <= s)*(S - ip)
+    return max(zero(ip), (ip <= s)*(S - ip))
 end
 (p::sSPolicy)(item::AbstractItem, v::AbstractVector) = p(item, v...)
 
@@ -11,7 +11,7 @@ print_action(::sSPolicy) = ["s", "S"]
 struct RQPolicy end
 
 function (::RQPolicy)(item::AbstractItem, R, Q)
-    (inventory_position(item) <= R)*Q
+    max(zero(Q), (inventory_position(item) <= R)*Q)
 end
 (p::RQPolicy)(item::AbstractItem, v::AbstractVector) = p(item, v...)
 
@@ -21,7 +21,7 @@ print_action(::RQPolicy) = ["R", "Q"]
 struct QPolicy end
 
 function (::QPolicy)(::AbstractItem, Q)
-    Q
+    max(zero(Q), Q)
 end
 (p::QPolicy)(item::AbstractItem, v::AbstractVector) = p(item, v...)
 
@@ -31,7 +31,7 @@ print_action(::QPolicy) = ["Q"]
 struct YQPolicy end
 
 function (::YQPolicy)(::AbstractItem, Y, Q)
-    (Y > 0)*Q    
+    max(zero(Q), (Y > 0)*Q)
 end
 (p::YQPolicy)(item::AbstractItem, v::AbstractVector) = p(item, v...)
 action_size(::YQPolicy) = 2
