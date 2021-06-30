@@ -17,7 +17,7 @@ state_size(is::InventorySystem) = sum(state_size.(is.bom))
 action_size(is::InventorySystem)::Int = sum(action_size.(is.bom))
 is_terminated(is::InventorySystem) = is.t > is.T
 reward(is::InventorySystem) = is.reward
-print_state(is::InventorySystem) = reduce(vcat, print_state.(is.bom))
+print_state(is::InventorySystem; forecast = true) = reduce(vcat, print_state.(is.bom, forecast = forecast))
 print_action(is::InventorySystem) = reduce(vcat, print_action.(is.bom))
 
 function compute_quantities(is,action)

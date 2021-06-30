@@ -17,8 +17,8 @@ end
 state(e::EndProduct) = [state(e.market); state(e.inventory); reduce(vcat,[state(source) for source in e.sources])]
 state_size(e::EndProduct) = state_size(e.market) + state_size(e.inventory) + sum(state_size.(e.sources)) 
 action_size(e::EndProduct) = action_size(e.policy)*length(e.sources)
-function print_state(e::EndProduct)
-    ps = [print_state(e.market); print_state(e.inventory); reduce(vcat, print_state.(e.sources))]
+function print_state(e::EndProduct; forecast = true)
+    ps = [print_state(e.market, forecast = forecast); print_state(e.inventory); reduce(vcat, print_state.(e.sources))]
     return [e.name*" "*first(p) => last(p) for p in ps] 
 end
 function print_action(e::EndProduct) 

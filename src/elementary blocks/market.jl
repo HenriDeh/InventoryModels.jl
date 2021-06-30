@@ -30,9 +30,12 @@ end
 
 state(ma::Market) = ma.lostsales ? ma.forecasts : [ma.backorder; ma.forecasts]
 state_size(ma::Market) = (ma.lostsales != 1) + ma.horizon*length(ma.forecast_reset)
-function print_state(ma::Market)
+function print_state(ma::Market; forecast = true)
     n_param = length(ma.forecasts) ÷ ma.horizon
     forecasts = ["$(ma.name) demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
+    if !forecast 
+        empty!(forecasts) 
+    end
     return ma.lostsales ? forecasts : ["$(ma.name) backorder" => ma.backorder ; forecasts]
 end
 
