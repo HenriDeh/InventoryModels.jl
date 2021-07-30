@@ -7,18 +7,38 @@ mutable struct InventorySystem
 end
 
 function InventorySystem(T, bom::Vector{<:AbstractItem}, constraints = AbstractConstraint[])
+    constraint_names = unique(map(c -> getfield(c, :name), constraints))
+    if length(constraint_names) < length(constraints) || "" in constraint_names
+        for (i,c) in enumerate(constraints)
+            if c.name == ""
+                c.name = "constraint_$i"
+            else
+                c.name *= "$i"
+            end
+        end
+    end
+    item_names = unique(map(it -> getfield(it, :name), bom))
+    if length(item_names) < length(bom) || "" in item_names
+        for (i,it) in enumerate(bom)
+            if it.name == ""
+                it.name = "item_$i"
+            else
+                it.name *= "$i"
+            end
+        end
+    end
     maxT = T == Inf ? typemax(Int) : Int(T)
     bom_to = topological_order(bom)
     InventorySystem(1, maxT, bom_to, constraints, 0.)
 end
 
-state(is::InventorySystem) = reduce(vcat, state.(is.bom))
-state_size(is::InventorySystem) = sum(state_size.(is.bom))
-action_size(is::InventorySystem)::Int = sum(action_size.(is.bom))
+state(is::InventorySystem) = reduce(vcat, map(state,is.bom))
+state_size(is::InventorySystem) = sum(map(state_size,is.bom))
+action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
 is_terminated(is::InventorySystem) = is.t > is.T
 reward(is::InventorySystem) = is.reward
-print_state(is::InventorySystem) = reduce(vcat, print_state.(is.bom))
-print_action(is::InventorySystem) = reduce(vcat, print_action.(is.bom))
+print_state(is::InventorySystem) = reduce(vcat, map(print_state, is.bom))
+print_action(is::InventorySystem) = reduce(vcat, map(print_action, is.bom))
 
 function compute_quantities(is,action)
     actions = Iterators.Stateful(action)
@@ -59,6 +79,7 @@ end
 
 function reset!(is::InventorySystem)
     reset!.(is.bom)
+    reset!.(is.constraints)
     is.t = 1
 end
 

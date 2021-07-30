@@ -1,4 +1,4 @@
-@testset begin
+@testset "ressource constraints" begin
     item1 = Item(Inventory(1, 1000), Supplier(100,1), name = "item1", policy = QPolicy())
     item2 = Item(Inventory(1, 1000), Supplier(100,1), name = "item2", policy = QPolicy())
     item3 = Item(Inventory(1, 1000), Supplier(100,1), name = "item3", policy = QPolicy())

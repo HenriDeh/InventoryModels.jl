@@ -3,6 +3,7 @@ mutable struct EndProduct{M<:Market, I<:Inventory, S<:Tuple, P} <: AbstractItem
     inventory::I 
     sources::S
     policy::P
+    position_log::Vector{Float64}
     name::String
 end
 
@@ -11,7 +12,7 @@ function EndProduct(market::Market, inventory::Inventory, sources::Union{Assembl
         market.backorder -= inventory.onhand
         inventory.onhand = 0
     end
-    EndProduct(market, inventory, sources, policy, name)
+    EndProduct(market, inventory, sources, policy, zeros(0), name)
 end
 
 state(e::EndProduct) = [state(e.market); state(e.inventory); reduce(vcat,[state(source) for source in e.sources])]
@@ -22,7 +23,7 @@ function print_state(e::EndProduct)
     return [e.name*" "*first(p) => last(p) for p in ps] 
 end
 function print_action(e::EndProduct) 
-    reduce(vcat, [e.name.*" ".*print_action(e.policy).*print_action(source) for source in e.sources])
+    reduce(vcat, [e.name .* " " .* source.name .* " " .* print_action(e.policy) for source in e.sources])
 end
 
 function pull!(e::EndProduct, quantity::Number, issuer)
@@ -51,6 +52,7 @@ function reward!(e::EndProduct)
     for source in e.sources
         r += reward!(source)
     end
+    push!(e.position_log, inventory_position(e))
     return r
 end
 
@@ -64,6 +66,7 @@ function reset!(e::EndProduct)
         e.market.backorder -= e.inventory.onhand
         e.inventory.onhand = 0
     end
+    empty!(e.position_log)
     return nothing
 end
 

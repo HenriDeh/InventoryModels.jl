@@ -6,12 +6,14 @@ mutable struct Supplier{F,L <:LeadTime}
     capacity::Float64
     leadtime::L
     pull_orders::IdDict{Any, Float64}
+    batchsize_log::Vector{Float64}
+    cost_log::Vector{Float64}
     name::String
 end
 
 function Supplier(order_cost; leadtime = leadtime::LeadTime = LeadTime(0, 0), capacity::Number = Inf, name = "supplier")
     @assert hasmethod(order_cost, Tuple{Supplier}) "order cost must have a method with `(::Supplier) signature`"
-    Supplier(order_cost, Float64(capacity), leadtime, IdDict{Any,Float64}(), name)
+    Supplier(order_cost, Float64(capacity), leadtime, IdDict{Any,Float64}(), zeros(0), zeros(0), name)
 end
 
 function Supplier(fixed_order_cost::Number, variable_order_cost::Number; leadtime::LeadTime = LeadTime(0, 0), capacity::Number = Inf, name = "supplier") 
@@ -29,7 +31,8 @@ function pull!(sup::Supplier, quantity::Number, issuer) #add leadtime
 end
 
 function dispatch!(sup::Supplier)
-    destination, quantity = first(sup.pull_orders)
+    destination, quantity = only(sup.pull_orders)
+    push!(sup.batchsize_log, quantity)
     push!(sup.leadtime, quantity, destination)
     dispatch!(sup.leadtime)
     nothing
@@ -37,6 +40,7 @@ end
 
 function reward!(sup::Supplier)
     cost = sup.order_cost(sup)
+    push!(sup.cost_log, cost)
     empty!(sup.pull_orders)
     return -cost + reward!(sup.leadtime)
 end
@@ -44,6 +48,8 @@ end
 inventory_position(sup::Supplier) = inventory_position(sup.leadtime)
 
 function reset!(s::Supplier)
+    empty!(s.cost_log)
+    empty!(s.batchsize_log)
     reset!(s.leadtime)
 end
 

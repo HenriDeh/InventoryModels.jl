@@ -4,16 +4,23 @@ abstract type AbstractConstraint end
 mutable struct RessourceConstraint <: AbstractConstraint
     capacity::Float64
     variablecosts::IdDict{Any,Float64}
+    utilization_log::Vector{Float64}
+    setup_log::Vector{Int}
     name::String
 end
-RessourceConstraint(capacity, pairs; name = "") = RessourceConstraint(capacity, IdDict{Any,Float64}(pairs), name)
-RessourceConstraint(capacity, pairs...; name = "") = RessourceConstraint(capacity, IdDict{Any,Float64}(pairs), name = name)
+RessourceConstraint(capacity, pairs; name = "") = RessourceConstraint(capacity, IdDict{Any,Float64}(pairs), zeros(0), zeros(0), name)
+RessourceConstraint(capacity, pairs...; name = "") = RessourceConstraint(capacity, pairs, name = name)
 
 function (rc::RessourceConstraint)()
     consumption = 0.0
+    setups = 0
     for (element, cost) in rc.variablecosts
-        consumption += sum(values(element.pull_orders))*cost
+        q = sum(values(element.pull_orders))
+        consumption += q*cost
+        setups += q > 0
     end
+    push!(rc.utilization_log, consumption/rc.capacity)
+    push!(rc.setup_log, setups)
     if consumption > rc.capacity
         ratio = rc.capacity/consumption
         for (element, cost) in rc.variablecosts
@@ -23,6 +30,11 @@ function (rc::RessourceConstraint)()
         end
     end
 end
+
+function reset!(rc::RessourceConstraint)
+    empty!(rc.setup_log)
+    empty!(rc.utilization_log)
+end 
 
 function Base.show(io::IO, rc::RessourceConstraint)
     print(io, "Ressource $(rc.name): ")

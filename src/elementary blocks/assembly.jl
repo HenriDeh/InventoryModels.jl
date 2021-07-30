@@ -5,6 +5,8 @@ mutable struct Assembly{F, L<:LeadTime, C <: Tuple}
     components::C
     requirements::IdDict{Any, Float64}
     pull_orders::IdDict{Any,Float64}
+    batchsize_log::Vector{Float64}
+    cost_log::Vector{Float64}
     name::String
 end
 
@@ -12,11 +14,11 @@ function Assembly(production_cost, components::Pair{<:Any, <:Number}...; leadtim
     @assert hasmethod(production_cost, Tuple{Assembly}) "production_cost must have a method with (::Assembly) signature"
     @assert length(components) >= 1 "Assembly must have at least one component"
     comps = tuple([first(pair) for pair in components]...)
-    Assembly(production_cost, Float64(capacity), leadtime, comps, IdDict{Any, Float64}(components), IdDict{Any,Float64}(), name)
+    Assembly(production_cost, Float64(capacity), leadtime, comps, IdDict{Any, Float64}(components), IdDict{Any,Float64}(), zeros(0), zeros(0), name)
 end
 
 function Assembly(fixed_order_cost::Number, variable_order_cost::Number, components::Pair{<:Any, <:Number}...; leadtime = LeadTime(0,0), capacity = Inf, name = "assembly")
-    Assembly(FixedLinearOrderCost(fixed_order_cost, variable_order_cost), components..., leadtime = leadtime, capacity = capacity, name = name )
+    Assembly(FixedLinearOrderCost(fixed_order_cost, variable_order_cost), components..., leadtime = leadtime, capacity = capacity, name = name)
 end
 
 state(a::Assembly) = state(a.leadtime)
@@ -49,6 +51,7 @@ function dispatch!(ass::Assembly)
         push!(component.inventory, excess, ass)
     end 
     ass.pull_orders[destination] = quantity
+    push!(ass.batchsize_log, quantity)
     push!(ass.leadtime, quantity, destination)
     dispatch!(ass.leadtime)
     nothing
@@ -56,13 +59,19 @@ end
 
 function reward!(ass::Assembly)
     cost = ass.production_cost(ass)
+    push!(ass.cost_log, cost)
     empty!(ass.pull_orders)
+    
     return -cost + reward!(ass.leadtime)
 end
 
 inventory_position(ass::Assembly) = inventory_position(ass.leadtime)
 
-reset!(a::Assembly) = reset!(a.leadtime)
+function reset!(a::Assembly) 
+    empty!(a.cost_log)
+    empty!(a.batchsize_log)
+    reset!(a.leadtime)
+end
 
 children(ass::Assembly) = ass.components
 

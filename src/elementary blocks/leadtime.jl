@@ -4,13 +4,14 @@ mutable struct LeadTime{F, D<:Distribution}
     leadtime::Int
     onorder_reset::D
     pull_orders::IdDict{Any,Float64}
+    cost_log::Vector{Float64}
 end
 
 function LeadTime(holding_cost, leadtime::Number, onorder::NumDist)
     @assert hasmethod(holding_cost, Tuple{LeadTime}) "holding cost must have a method with (::LeadTime) signature"
     doo = parametrify(onorder)
     oo = max.(0.0, rand(doo, leadtime))
-    LeadTime(holding_cost, oo, Int(leadtime), doo, IdDict{Any, Float64}())
+    LeadTime(holding_cost, oo, Int(leadtime), doo, IdDict{Any, Float64}(), zeros(0))
 end
 
 function LeadTime(holding_cost::Number, leadtime::Number, onorder::NumDist)
@@ -39,6 +40,7 @@ end
 
 function reward!(lt::LeadTime)
     cost = lt.holding_cost(lt)
+    push!(lt.cost_log, cost)
     empty!(lt.pull_orders)
     return -cost
 end
@@ -46,6 +48,7 @@ end
 inventory_position(lt::LeadTime) = sum(lt.onorder)
     
 function reset!(lt::LeadTime)
+    empty!(lt.cost_log)
     lt.onorder = max.(0., rand(lt.onorder_reset, lt.leadtime))
 end
 

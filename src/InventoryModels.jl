@@ -1,5 +1,7 @@
 module InventoryModels
 
+using Distributions: include, length
+using DataStructures: empty!
 using Distributions, DataStructures, MacroTools, Base.Iterators, Reexport
 
 const NumDist = Union{Number, Distribution}
@@ -36,4 +38,6 @@ export sl_sip
 include("Scarf/Scarf.jl")
 export Scarf
 include("Scarf/interface.jl")
+export ISLogger
+include("logger.jl")
 end
