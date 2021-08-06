@@ -16,16 +16,18 @@ function ISLogger(is::InventorySystem)
     ISLogger(logs, 0)
 end
 
-function (logger::ISLogger)(is::InventorySystem)
+function (logger::ISLogger)(is::InventorySystem; log_id = 0)
     logger.nlogs +=1
     for item in is.bom
         df = get_logs(item)
         df.simulation_id = fill(logger.nlogs,nrow(df))
+        df.log_id = fill(log_id, nrow(df))
         append!(logger.logs[item.name], df)
     end
     for cons in is.constraints
         df = get_logs(cons)
         df.simulation_id = fill(logger.nlogs, nrow(df))
+        df.log_id = fill(log_id, nrow(df))
         append!(logger.logs[cons.name], df)
     end
 end

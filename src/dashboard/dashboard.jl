@@ -21,7 +21,7 @@ function make_pane!(fig, f)
     exp_tog = Toggle(fig)
     f[3,1] = grid!([exp_tog Label(fig, "Exponential smoothing")], tellwidth = false)
 
-    x1 = @lift $df[:, "simulation_id"]
+    x1 = @lift $df[:, "log_id"]
     y1 = @lift begin
         if $(ax_menu.selection) !== nothing
             $df[:, $(ax_menu.selection)]
