@@ -4,10 +4,10 @@ using GLMakie.Makie.MakieCore: Automatic
 include("plot_inventory.jl")
 include("plot_market.jl")
 include("plot_ressourcecons.jl")
-include("../../test/test_logger.jl")
-lg = logger
+#include("../../test/test_logger.jl")
+#lg = logger
 
-function make_pane!(fig, f)
+function make_pane!(fig, f, lg)
     item_menu = f[1,1] = Menu(fig, options = keys(lg.logs))
     item_menu.i_selected = 1
     df = @lift $lg[$(item_menu.selection)]
@@ -68,11 +68,11 @@ function make_plot!(gp, ax, selection, x, y, smoothing)
     end
 end
 
-begin 
+function dashboard(logger)
     f = Figure(resolution = (1600,900))
     for i in 1:2, j in 1:2
         gl = f[i,j] = GridLayout()
-        make_pane!(f, gl)
+        make_pane!(f, gl, logger)
     end
     display(f)
 end
