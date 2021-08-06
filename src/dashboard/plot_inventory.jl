@@ -7,7 +7,7 @@ function plot_mean(gp, ax, x, y, smoothing)
     end
     yall ./= xall
     if smoothing
-        yall = accumulate((o,n) -> o*0.8+n*0.2, yall)
+        yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,yall)
     end
     l = lines!(ax, yall, color = :red)
     Legend(gp, [l], ["mean"], tellwidth = false, tellhight = false, valign = :top , halign = :right)

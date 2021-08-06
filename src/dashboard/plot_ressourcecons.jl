@@ -21,9 +21,9 @@ function plot_resource_utilization(gp, ax, x, y, smoothing)
     yall ./= xall
     perhigh = xhigh ./(xlow .+ xhigh)
     if smoothing
-        ylow = accumulate((o,n) -> o*0.8+n*0.2, ylow)
-        yhigh = accumulate((o,n) -> o*0.8+n*0.2, yhigh)
-        yall = accumulate((o,n) -> o*0.8+n*0.2, yall)
+        ylow = accumulate!((o,n) -> o*0.8+n*0.2, ylow,ylow)
+        yhigh = accumulate!((o,n) -> o*0.8+n*0.2, yhigh,yhigh)
+        yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,yall)
     end
     b = barplot!(ax, perhigh, color = :gray80)
     l1 = lines!(ax, yhigh, color = :red)

@@ -14,8 +14,8 @@ function plot_stockout(gp,ax,x,y,smoothing)
     ypos ./= [n == 0 ? 1 : n for n in xpos]
     yall ./= xall    
     if smoothing
-        ypos = accumulate((o,n) -> o*0.8+n*0.2, ypos)
-        yall = accumulate((o,n) -> o*0.8+n*0.2, yall)
+        ypos = accumulate!((o,n) -> o*0.8+n*0.2, ypos,ypos)
+        yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,ypos)
     end
     l1 = lines!(ax, ypos, color = :red)
     l2 = lines!(ax, yall, color = :green)
@@ -39,7 +39,7 @@ function plot_fillrate(gp,ax,x,y,smoothing)
     yall ./= xall
     yone ./= xall
     if smoothing
-        yall = accumulate((o,n) -> o*0.8+n*0.2, yall)
+        yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,yall)
     end
     b = barplot!(ax, yone, color = :gray80)
     l = lines!(ax, yall, color = :red)
