@@ -1,7 +1,7 @@
 name = "InventoryModels"
 uuid = "be94c240-e620-4455-b2c0-7979cca4862a"
 authors = ["Dehaybe <henri.dehaybe@uclouvain.be>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
