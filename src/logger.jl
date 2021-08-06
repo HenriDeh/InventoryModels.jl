@@ -56,7 +56,7 @@ function get_logs(ass::Assembly)
 end
 
 function get_logs(inv::Inventory)
-    DataFrame(inventory_onhand = inv.on_hand_log, inventory_stockout = inv.stockout_log, inventory_cost = inv.cost_log)
+    DataFrame(inventory_onhand = inv.on_hand_log, inventory_stockout = inv.stockout_log, inventory_fillrate = inv.fillrate_log, inventory_cost = inv.cost_log)
 end
 
 function get_logs(lt::LeadTime)

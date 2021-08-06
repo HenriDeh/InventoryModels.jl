@@ -16,6 +16,7 @@ mutable struct Inventory{Dl<:Distribution, F}
     pull_orders::IdDict{Any, Float64}
     on_hand_log::Vector{Float64}
     stockout_log::Vector{Float64}
+    fillrate_log::Vector{Float64}
     cost_log::Vector{Float64}
     name::String
 end
@@ -23,7 +24,7 @@ end
 function Inventory(holding_cost, onhand::NumDist; capacity::Number = Inf, name = "inventory")
     @assert hasmethod(holding_cost, Tuple{Inventory}) "holding cost must have a method with `(::Inventory)` arguments"
     dl = parametrify(onhand)
-    Inventory{typeof(dl), typeof(holding_cost)}(holding_cost, min(capacity, Float64(rand(dl))), Float64(capacity), dl,  IdDict(), zeros(0), zeros(0), zeros(0), name)
+    Inventory{typeof(dl), typeof(holding_cost)}(holding_cost, min(capacity, Float64(rand(dl))), Float64(capacity), dl,  IdDict(), zeros(0), zeros(0), zeros(0), zeros(0), name)
 end
 
 function Inventory(holding_cost::Number, onhand::NumDist; capacity::Number = Inf, name = "inventory")
@@ -52,9 +53,11 @@ function dispatch!(inv::Inventory)
             push!(issuer, quantity*proportion, inv)
         end
         push!(inv.stockout_log, (1-proportion)*sumorders)
+        push!(inv.fillrate_log, proportion)
         inv.onhand -= proportion*sumorders
     else
         push!(inv.stockout_log, 0.0)
+        push!(inv.fillrate_log, 1.0)
         for (issuer, quantity) in inv.pull_orders
             push!(issuer, 0.0, inv)
         end
@@ -85,6 +88,7 @@ Randomizes inv's on-hand inventory with respect to its initial distribution"
 function reset!(inv::Inventory)
     empty!(inv.cost_log)
     empty!(inv.on_hand_log)
+    empty!(inv.fillrate_log)
     empty!(inv.stockout_log)
     inv.onhand = min(inv.capacity, rand(inv.onhand_reset))
     return nothing
