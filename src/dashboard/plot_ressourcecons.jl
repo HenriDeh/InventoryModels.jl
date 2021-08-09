@@ -1,4 +1,4 @@
-function plot_resource_utilization(fig, gp, ax, x, y, smoothing)
+function plot_resource_utilization(fig, gp, ax, x, y, smoothing,ticks)
     xlow = fill(0, length(unique(x)))
     ylow = zeros(length(xlow))
     xhigh = zero(xlow)
@@ -29,14 +29,14 @@ function plot_resource_utilization(fig, gp, ax, x, y, smoothing)
         yhigh = accumulate!((o,n) -> o*0.8+n*0.2, yhigh,yhigh)
         yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,yall)
     end
-    b = barplot!(ax, perhigh, color = :gray80)
-    l1 = lines!(ax, yhigh, color = :red)
-    l2 = lines!(ax, ylow, color = :green)
-    l3 = lines!(ax, yall, color = :blue)
+    b = barplot!(ax,ticks, perhigh, color = :gray80)
+    l1 = lines!(ax,ticks, yhigh, color = :red)
+    l2 = lines!(ax,ticks, ylow, color = :green)
+    l3 = lines!(ax,ticks, yall, color = :blue)
     gp[2,1] = Legend(fig, [b,l1,l2,l3], ["% over capacity", "mean over capacity","mean under capacity", "mean utilization"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end
-function plot_ressource_setups(fig,gp,ax,x,y, smoothing)
+function plot_ressource_setups(fig,gp,ax,x,y, smoothing,ticks)
     yint = Int.(y)
     ys = sort(unique(yint)) #grps
     counts = zeros(length(ys), maximum(x))
@@ -53,7 +53,7 @@ function plot_ressource_setups(fig,gp,ax,x,y, smoothing)
     counts ./= xcounts
     grp = repeat(ys, outer = maximum(x))
     pal = ax.attributes[:palette][:color][]
-    barplot!(ax,xs, vec(counts), stack=grp, color = [pal[g] for g in grp])
+    barplot!(ax,ticks,xs, vec(counts), stack=grp, color = [pal[g] for g in grp])
     labels = string.(ys)
     gp[2,1] = Legend(fig, [PolyElement(color = i) for i in [pal[j] for j in ys]], labels, "# setups", tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing

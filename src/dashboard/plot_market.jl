@@ -1,4 +1,4 @@
-function plot_stockout(fig, gp,ax,x,y,smoothing)
+function plot_stockout(fig, gp,ax,x,y,smoothing,ticks)
     xpos = fill(0, length(unique(x)))
     ypos = zeros(length(xpos))
     yall = zero(ypos)
@@ -21,13 +21,13 @@ function plot_stockout(fig, gp,ax,x,y,smoothing)
         ypos = accumulate!((o,n) -> o*0.8+n*0.2, ypos,ypos)
         yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,ypos)
     end
-    l1 = lines!(ax, ypos, color = :red)
-    l2 = lines!(ax, yall, color = :green)
+    l1 = lines!(ax,ticks, ypos, color = :red)
+    l2 = lines!(ax,ticks, yall, color = :green)
     gp[2,1] = Legend(fig, [l2,l1], ["mean stockout", "mean ⊕ stockout"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end
 
-function plot_fillrate(fig, gp,ax,x,y,smoothing)
+function plot_fillrate(fig, gp,ax,x,y,smoothing,ticks)
     ax.yticks = 0:0.1:1
     xone = fill(0, length(unique(x)))
     yone = zeros(length(xone))
@@ -49,8 +49,8 @@ function plot_fillrate(fig, gp,ax,x,y,smoothing)
     if smoothing
         yall = accumulate!((o,n) -> o*0.8+n*0.2, yall,yall)
     end
-    b = barplot!(ax, yone, color = :gray80)
-    l = lines!(ax, yall, color = :red)
+    b = barplot!(ax,ticks, yone, color = :gray80)
+    l = lines!(ax,ticks, yall, color = :red)
     gp[2,1] = Legend(fig, [b, l], ["α service", "β service"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end
