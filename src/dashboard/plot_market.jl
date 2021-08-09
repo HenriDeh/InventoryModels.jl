@@ -1,9 +1,13 @@
-function plot_stockout(gp,ax,x,y,smoothing)
-    xpos = fill(0, maximum(x))
+function plot_stockout(fig, gp,ax,x,y,smoothing)
+    xpos = fill(0, length(unique(x)))
     ypos = zeros(length(xpos))
     yall = zero(ypos)
     xall = zero(xpos)
-    for (idx, b) in zip(x,y)
+    last = first(x)
+    idx = 1
+    for (new, b) in zip(x, y)
+        idx += new !== last
+        last = new
         if  b > 0
             ypos[idx] += b
             xpos[idx] += 1
@@ -11,7 +15,7 @@ function plot_stockout(gp,ax,x,y,smoothing)
         yall[idx] += b
         xall[idx] += 1
     end
-    ypos ./= [n == 0 ? 1 : n for n in xpos]
+    ypos ./= [n == 0 ? one(n) : n for n in xpos]
     yall ./= xall    
     if smoothing
         ypos = accumulate!((o,n) -> o*0.8+n*0.2, ypos,ypos)
@@ -19,17 +23,21 @@ function plot_stockout(gp,ax,x,y,smoothing)
     end
     l1 = lines!(ax, ypos, color = :red)
     l2 = lines!(ax, yall, color = :green)
-    Legend(gp, [l2,l1], ["mean stockout", "mean ⊕ stockout"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
+    gp[2,1] = Legend(fig, [l2,l1], ["mean stockout", "mean ⊕ stockout"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end
 
-function plot_fillrate(gp,ax,x,y,smoothing)
+function plot_fillrate(fig, gp,ax,x,y,smoothing)
     ax.yticks = 0:0.1:1
-    xone = fill(0, maximum(x))
+    xone = fill(0, length(unique(x)))
     yone = zeros(length(xone))
     yall = zero(yone)
     xall = zero(xone)
-    for (idx, b) in zip(x,y)
+    last = first(x)
+    idx = 1
+    for (new, b) in zip(x, y)
+        idx += new !== last
+        last = new
         if b == 1
             yone[idx] += 1
         end
@@ -43,6 +51,6 @@ function plot_fillrate(gp,ax,x,y,smoothing)
     end
     b = barplot!(ax, yone, color = :gray80)
     l = lines!(ax, yall, color = :red)
-    Legend(gp, [b, l], ["α service", "β service"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
+    gp[2,1] = Legend(fig, [b, l], ["α service", "β service"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end

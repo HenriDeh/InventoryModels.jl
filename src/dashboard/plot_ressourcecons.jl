@@ -1,11 +1,15 @@
-function plot_resource_utilization(gp, ax, x, y, smoothing)
-    xlow = fill(0, maximum(x))
+function plot_resource_utilization(fig, gp, ax, x, y, smoothing)
+    xlow = fill(0, length(unique(x)))
     ylow = zeros(length(xlow))
     xhigh = zero(xlow)
     yhigh = zero(ylow)
     yall = zero(ylow)
     xall = zero(xlow)
-    for (idx, ut) in zip(x,y)
+    last = first(x)
+    idx = 1
+    for (new, ut) in zip(x, y)
+        idx += new !== last
+        last = new
         if ut > 1
             yhigh[idx] += ut
             xhigh[idx] += 1
@@ -29,15 +33,19 @@ function plot_resource_utilization(gp, ax, x, y, smoothing)
     l1 = lines!(ax, yhigh, color = :red)
     l2 = lines!(ax, ylow, color = :green)
     l3 = lines!(ax, yall, color = :blue)
-    Legend(gp, [b,l1,l2,l3], ["% over capacity", "mean over capacity","mean under capacity", "mean utilization"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
+    gp[2,1] = Legend(fig, [b,l1,l2,l3], ["% over capacity", "mean over capacity","mean under capacity", "mean utilization"], tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end
-function plot_ressource_setups(gp,ax,x,y, smoothing)
+function plot_ressource_setups(fig,gp,ax,x,y, smoothing)
     yint = Int.(y)
     ys = sort(unique(yint)) #grps
     counts = zeros(length(ys), maximum(x))
     xcounts = fill(0, 1, maximum(x))
-    for (idx, setups) in zip(x, yint)
+    last = first(x)
+    idx = 1
+    for (new, b) in zip(x, yint)
+        idx += new !== last
+        last = new
         xcounts[idx] += 1
         counts[setups, idx] += 1
     end
@@ -47,6 +55,6 @@ function plot_ressource_setups(gp,ax,x,y, smoothing)
     pal = ax.attributes[:palette][:color][]
     barplot!(ax,xs, vec(counts), stack=grp, color = [pal[g] for g in grp])
     labels = string.(ys)
-    Legend(gp, [PolyElement(color = i) for i in [pal[j] for j in ys]], labels, "# setups", tellwidth = false, tellhight = false, valign = :top , halign = :right)
+    gp[2,1] = Legend(fig, [PolyElement(color = i) for i in [pal[j] for j in ys]], labels, "# setups", tellwidth = false, tellhight = false, valign = :top , halign = :right)
     nothing
 end
