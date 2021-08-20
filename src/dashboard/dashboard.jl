@@ -4,6 +4,7 @@ using GLMakie.Makie.MakieCore: Automatic
 include("plot_inventory.jl")
 include("plot_market.jl")
 include("plot_ressourcecons.jl")
+include("graph.jl")
 include("../../test/test_logger.jl")
 #lg = logger
 
@@ -67,13 +68,7 @@ end
 
 function dashboard(logger::ISLogger)
     f = Figure(resolution = (1600,900))
-    for j in 1:2
-        gl = f[1,j] = GridLayout()
-        make_pane!(f, gl, logger)
-    end
+    gl = f[1,1] = GridLayout()
+    make_pane!(f, gl, logger)
     display(f)
-end
-
-function dashboard(tester::TestEnvironment)
-    f = Figure(resolution = (1600,900))
 end
