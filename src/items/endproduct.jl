@@ -23,11 +23,7 @@ function print_state(e::EndProduct; forecast = true)
     return [e.name*" "*first(p) => last(p) for p in ps] 
 end
 function print_action(e::EndProduct) 
-<<<<<<< HEAD
-    reduce(vcat, [e.name .* " " .* print_action(e.policy) .* " " .* source.name for source in e.sources])
-=======
     reduce(vcat, [e.name .* " " .* source.name .* " " .* print_action(e.policy) for source in e.sources])
->>>>>>> hooks
 end
 
 function pull!(e::EndProduct, quantity::Number, issuer)

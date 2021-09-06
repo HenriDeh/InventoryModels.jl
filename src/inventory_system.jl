@@ -37,13 +37,8 @@ state_size(is::InventorySystem) = sum(map(state_size,is.bom))
 action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
 is_terminated(is::InventorySystem) = is.t > is.T
 reward(is::InventorySystem) = is.reward
-<<<<<<< HEAD
-print_state(is::InventorySystem; forecast = true) = reduce(vcat, print_state.(is.bom, forecast = forecast))
-print_action(is::InventorySystem) = reduce(vcat, print_action.(is.bom))
-=======
 print_state(is::InventorySystem) = reduce(vcat, map(print_state, is.bom))
 print_action(is::InventorySystem) = reduce(vcat, map(print_action, is.bom))
->>>>>>> hooks
 
 function compute_quantities(is,action)
     actions = Iterators.Stateful(action)
