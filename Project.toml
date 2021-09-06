@@ -1,13 +1,23 @@
 name = "InventoryModels"
 uuid = "be94c240-e620-4455-b2c0-7979cca4862a"
 authors = ["Dehaybe <henri.dehaybe@uclouvain.be>"]
+<<<<<<< HEAD
 version = "0.2.2"
+=======
+version = "0.3.0"
+>>>>>>> hooks
 
 [deps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+GraphMakie = "1ecd5474-83a3-4783-bb4f-06765db800d2"
+LightGraphs = "093fc24a-ae57-5d10-9952-331d41423f4d"
 MacroTools = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
+NetworkLayout = "46757867-2c16-5918-afeb-47bfcb05e46a"
 Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
+Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

@@ -2,11 +2,12 @@ mutable struct Item{I<:Inventory, S<:Tuple, P} <: AbstractItem
     inventory::I 
     sources::S
     policy::P
+    position_log::Vector{Float64}
     name::String
 end
 
 function Item(inventory::Inventory, sources::Union{Assembly, Supplier}...; policy = sSPolicy(), name = "item")
-    Item(inventory, sources, policy, name)
+    Item(inventory, sources, policy, zeros(0), name)
 end
 
 state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
@@ -16,7 +17,11 @@ function print_state(e::Item; forecast = true)
     ps = [print_state(e.inventory); reduce(vcat, print_state.(e.sources))]
     return [e.name*" "*first(p) => last(p) for p in ps]    
 end
+<<<<<<< HEAD
 print_action(e::Item) = reduce(vcat, [e.name .* " " .* print_action(e.policy) .* " " .* source.name for source in e.sources])
+=======
+print_action(e::Item) = reduce(vcat, [e.name .* " " .* source.name .* " " .* print_action(e.policy) for source in e.sources])
+>>>>>>> hooks
 
 function pull!(e::Item, quantity::Number, issuer)
     pull!(e.inventory, quantity, issuer)
@@ -41,10 +46,12 @@ function reward!(e::Item)
     for source in e.sources
         r += reward!(source)
     end
+    push!(e.position_log, inventory_position(e))
     return r
 end
 
 function reset!(e::Item)
+    empty!(e.position_log)
     reset!(e.inventory)
     for source in e.sources
         reset!(source)

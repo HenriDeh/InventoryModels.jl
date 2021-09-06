@@ -1,3 +1,4 @@
+using Distributions, InventoryModels
 @testset "inventory_system.jl" begin
     item1 = Item(Inventory(1, 11), Supplier(100,1), Supplier(10,1, leadtime = LeadTime(1, 9)), name = "item1")
     item2 = Item(Inventory(1, 12), Supplier(100,1), name = "item2")

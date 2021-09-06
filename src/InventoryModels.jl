@@ -1,5 +1,6 @@
 module InventoryModels
 
+using Requires
 using Distributions, DataStructures, MacroTools, Base.Iterators, Reexport
 
 const NumDist = Union{Number, Distribution}
@@ -36,4 +37,8 @@ export sl_sip
 include("Scarf/Scarf.jl")
 export Scarf
 include("Scarf/interface.jl")
+export ISLogger
+include("logger.jl")
+export dashboard, draw_graph
+include("dashboard/dashboard.jl")
 end
