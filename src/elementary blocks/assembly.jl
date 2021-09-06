@@ -41,7 +41,7 @@ function Base.push!(ass::Assembly, quantity, source)
 end
 
 function dispatch!(ass::Assembly)
-    destination = only(filter(i -> !(i in getfield.(ass.components, :inventory)), keys(ass.pull_orders)))
+    destination = only(setdiff(keys(ass.pull_orders), (c.inventory for c in ass.components)))
     quantity = ass.pull_orders[destination]
     for (component, required) in ass.requirements
         quantity = min(quantity, ass.pull_orders[component.inventory]/required)
