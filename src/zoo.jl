@@ -1,11 +1,11 @@
-function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, pad = true, policy = sSPolicy())
+function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, horizon = length(μ)÷2, policy = sSPolicy())
     item = EndProduct(
-        Market(b, CVNormal{CV}, length(μ), 0, [μ; pad ? zero(μ) : μ], lostsales = lostsales),
+        Market(b, CVNormal{CV}, horizon, 0, μ, lostsales = lostsales),
         Inventory(h, start_inventory),
         Supplier(K,c, leadtime = LeadTime(LT, 0)),
         policy = policy
     )
-    InventorySystem(length(μ), [item])
+    InventorySystem(length(μ) - horizon, [item])
 end
 
 function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::Int = 0; lostsales = false, policy = sSPolicy())
