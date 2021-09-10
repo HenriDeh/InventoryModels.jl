@@ -8,7 +8,7 @@ function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsa
     InventorySystem(length(μ) - horizon, [item])
 end
 
-function sl_sip(h, b, K, CV, c, μ::Distribution, horizon, start_inventory, LT::Int = 0; lostsales = false, policy = sSPolicy())
+function sl_sip(h, b, K, CV, c, μ::Distribution, start_inventory, LT::Int = 0; lostsales = false, policy = sSPolicy(), horizon)
     item = EndProduct(
         Market(b, CVNormal{CV}, horizon, 0, μ, lostsales = lostsales),
         Inventory(h, start_inventory),
