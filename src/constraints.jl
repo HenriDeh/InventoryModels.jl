@@ -28,6 +28,9 @@ function (rc::RessourceConstraint)()
                 element.pull_orders[destination] *= ratio
             end
         end
+        return ratio
+    else
+        return 1.0
     end
 end
 

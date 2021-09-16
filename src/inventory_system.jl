@@ -63,8 +63,9 @@ function (is::InventorySystem)(action::AbstractVector)
         item(quantity[item])
     end
     #Stage: PreConsStage
+    ratio_sum = 0.0
     for cons in is.constraints
-        cons()
+        ratio_sum += cons()
     end
     #Stage: PreDispatchStage
     for item in Iterators.reverse(is.bom)
