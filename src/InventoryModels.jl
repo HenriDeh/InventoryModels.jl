@@ -39,6 +39,6 @@ export Scarf
 include("Scarf/interface.jl")
 export ISLogger
 include("logger.jl")
-export dashboard, draw_graph
-include("dashboard/dashboard.jl")
+#=export dashboard, draw_graph
+include("dashboard/dashboard.jl")=#
 end
