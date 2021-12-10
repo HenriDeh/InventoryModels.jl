@@ -9,6 +9,7 @@ MacroTools.@forward CVNormal.normal Distributions.mean, Base.rand, Distributions
     Distributions.maximum, Distributions.insupport, Distributions.var, Distributions.std, Distributions.modes, Distributions.mode, Distributions.skewness, Distributions.kurtosis,
     Distributions.entropy, Distributions.mgf, Distributions.cf, Base.eltype
 Distributions.params(d::CVNormal) = mean(d)
+Base.rand(i::InventoryModels.CVNormal, v::Vararg{Int64, N} where N) = rand(i.normal, v)
 
 cv(d::CVNormal{CV}) where CV = CV
 cv(d::Type{CVNormal{CV}}) where CV = CV
