@@ -24,7 +24,7 @@ end
 
 state(lt::LeadTime) = vec(lt.onorder)
 state_size(lt::LeadTime) = lt.leadtime
-print_state(lt::LeadTime) = [" on order t-$i" => oo for (i, oo) in enumerate(lt.onorder)]
+print_state(lt::LeadTime) = [" on order t+$i" => oo for (i, oo) in enumerate(lt.onorder)]
 
 function Base.push!(lt::LeadTime, quantity, source)
     lt.pull_orders[source] = quantity

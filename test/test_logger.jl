@@ -21,12 +21,12 @@ begin
     is([30,0,0])
     is([10,0,10])
     logger(is)
-    reset!(is)=#
+    reset!(is)
     for _ in 1:100
         for it in 1:6
             is(rand(0:20,3))
         end
         logger(is)
         reset!(is)
-    end
+    end=#
 end

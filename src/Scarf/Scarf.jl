@@ -111,7 +111,7 @@ function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
         x = y .- ξ
         p = cdf.(df, ξ .+ ξ.step.hi/2) .- cdf.(df, ξ .- ξ.step.hi/2)
         c(x) = C(instance, x, t+1, pwla)
-        return sum(c.(x) .* p) - cdf(df, y)c(zero(y))*(1-instance.backlog)
+        return sum(c.(x) .* p) + (1 - cdf(df, y))*c(zero(y))*(1-instance.backlog)
     end
 end
 
