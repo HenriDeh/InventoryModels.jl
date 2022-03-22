@@ -41,14 +41,14 @@ function Instance(h,b,K,c,CV,LT,demands, gamma = 1. ; backlog = one(CV))
     Instance{T}(h,b,K,c,LT, gamma, backlog, dists,lt_dists,length(dists), S, s)
 end
 
-mutable struct Pwla{T,S<:StepRangeLen}
-    breakpoints::Vector{T,1}
+mutable struct Pwla{T, S <: StepRangeLen}
+    breakpoints::Vector{T}
     range::S
 end
 
-function Pwla(stepsize)
-    T = typeof(stepsize)
-    Pwla(T[], stepsize:stepsize:stepsize)
+function Pwla(s)
+    stepsize = Float64(s)
+    Pwla(Float64[], stepsize:stepsize:stepsize)
 end
 
 Base.push!(p::Pwla, x) = push!(p.breakpoints, x)
@@ -107,7 +107,7 @@ function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
     else
         df = instance.demand_forecasts[t]
         ub = instance.backlog ? quantile(df, 0.99999) : y
-        ξ = pwla.range.step:pwla.range.step:ub
+        ξ = typeof(y)(pwla.range.step):typeof(y)(pwla.range.step):ub
         x = y .- ξ
         p = cdf.(df, ξ .+ ξ.step.hi/2) .- cdf.(df, ξ .- ξ.step.hi/2)
         c(x) = C(instance, x, t+1, pwla)
