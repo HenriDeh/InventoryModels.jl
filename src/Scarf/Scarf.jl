@@ -41,14 +41,14 @@ function Instance(h,b,K,c,CV,LT,demands, gamma = 1. ; backlog = one(CV))
     Instance{T}(h,b,K,c,LT, gamma, backlog, dists,lt_dists,length(dists), S, s)
 end
 
-mutable struct Pwla{T}
-    breakpoints::Array{T,1}
-    range::StepRangeLen{T,T,T}
+mutable struct Pwla{T,S<:StepRangeLen}
+    breakpoints::Vector{T,1}
+    range::S
 end
 
 function Pwla(stepsize)
     T = typeof(stepsize)
-    Pwla{T}(Array{T,1}(), stepsize:stepsize:stepsize)
+    Pwla(T[], stepsize:stepsize:stepsize)
 end
 
 Base.push!(p::Pwla, x) = push!(p.breakpoints, x)
