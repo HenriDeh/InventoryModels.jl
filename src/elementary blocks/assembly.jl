@@ -21,7 +21,7 @@ function Assembly(fixed_order_cost::Number, variable_order_cost::Number, compone
     Assembly(FixedLinearOrderCost(fixed_order_cost, variable_order_cost), components..., leadtime = leadtime, capacity = capacity, name = name)
 end
 
-state(a::Assembly) = state(a.leadtime)
+RLBase.state(a::Assembly) = state(a.leadtime)
 state_size(a::Assembly) = state_size(a.leadtime)
 print_state(a::Assembly) = print_state(a.leadtime)
 

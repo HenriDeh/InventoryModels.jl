@@ -31,7 +31,7 @@ function Inventory(holding_cost::Number, onhand::NumDist; capacity::Number = Inf
     Inventory(LinearHoldingCost(holding_cost), onhand, capacity = capacity, name = name)
 end
 
-state(inv::Inventory) = [inv.onhand]
+RLBase.state(inv::Inventory) = [inv.onhand]
 state_size(::Inventory) = 1
 print_state(inv::Inventory) = [inv.name*" on hand" => inv.onhand]
 

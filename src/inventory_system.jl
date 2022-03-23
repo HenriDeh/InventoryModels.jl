@@ -1,4 +1,6 @@
-mutable struct InventorySystem
+using ReinforcementLearningBase
+
+mutable struct InventorySystem <: AbstractEnv
     t::Int
     T::Int
     bom::Vector{AbstractItem}
@@ -32,11 +34,11 @@ function InventorySystem(T, bom::Vector{<:AbstractItem}, constraints = AbstractC
     InventorySystem(1, maxT, bom_to, constraints, 0.)
 end
 
-state(is::InventorySystem) = reduce(vcat, map(state,is.bom))
-state_size(is::InventorySystem) = sum(map(state_size,is.bom))
-action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
-is_terminated(is::InventorySystem) = is.t > is.T
-reward(is::InventorySystem) = is.reward
+RLBase.state(is::InventorySystem) = reduce(vcat, map(state,is.bom))
+RLBase.state_size(is::InventorySystem) = sum(map(state_size,is.bom))
+RLBase.action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
+RLBase.is_terminated(is::InventorySystem) = is.t > is.T
+RLBase.reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, map(print_state, is.bom))
 print_action(is::InventorySystem) = reduce(vcat, map(print_action, is.bom))
 

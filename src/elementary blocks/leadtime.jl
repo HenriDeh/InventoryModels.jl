@@ -22,7 +22,7 @@ function LeadTime(leadtime::Number, onorder::NumDist)
     LeadTime(it-> 0.0, leadtime, onorder)
 end
 
-state(lt::LeadTime) = vec(lt.onorder)
+RLBase.state(lt::LeadTime) = vec(lt.onorder)
 state_size(lt::LeadTime) = lt.leadtime
 print_state(lt::LeadTime) = [" on order t+$i" => oo for (i, oo) in enumerate(lt.onorder)]
 

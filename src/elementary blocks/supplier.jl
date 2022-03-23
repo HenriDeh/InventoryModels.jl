@@ -20,7 +20,7 @@ function Supplier(fixed_order_cost::Number, variable_order_cost::Number; leadtim
     Supplier(FixedLinearOrderCost(fixed_order_cost,variable_order_cost), leadtime = leadtime, capacity = capacity, name = name)
 end
 
-state(s::Supplier) = state(s.leadtime)
+RLBase.state(s::Supplier) = state(s.leadtime)
 state_size(s::Supplier) = state_size(s.leadtime)
 print_state(s::Supplier) = print_state(s.leadtime)
 

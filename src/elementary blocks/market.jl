@@ -30,9 +30,9 @@ function Market(stockout_cost::Number, demand_distribution::Type{<:Distribution}
     Market(LinearStockoutCost(stockout_cost), demand_distribution, horizon, backorder_reset, forecast_reset..., lostsales = lostsales, name = name)
 end
 
-state(ma::Market) = [ma.backorder; ma.forecasts]
+RLBase.state(ma::Market) = [ma.backorder; ma.forecasts]
 state_size(ma::Market) = 1+ma.horizon*length(ma.forecast_reset)
-function print_state(ma::Market, forecast = true)
+function print_state(ma::Market)
     n_param = length(ma.forecasts) ÷ ma.horizon
     forecasts = ["$(ma.name) demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
     if !forecast 
