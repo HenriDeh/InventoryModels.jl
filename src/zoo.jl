@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, horizon = length(μ)÷2, policy = sSPolicy(), periods = length(μ) - horizon)
+=======
+function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, horizon = length(μ), policy = sSPolicy(), periods = horizon)
+>>>>>>> 46e69d4 (fix tests and zoo)
     item = EndProduct(
         Market(b, CVNormal{CV}, horizon, 0, μ, lostsales = lostsales),
         Inventory(h, start_inventory),
