@@ -1,4 +1,4 @@
-function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, horizon = length(μ), policy = sSPolicy(), periods = length(μ))
+function sl_sip(h, b, K, CV, c, μ::Vector, start_inventory, LT::Int = 0; lostsales = false, horizon = length(μ), policy = sSPolicy(), periods = horizon)
     item = EndProduct(
         Market(b, CVNormal{CV}, horizon, 0, μ, lostsales = lostsales),
         Inventory(h, start_inventory),

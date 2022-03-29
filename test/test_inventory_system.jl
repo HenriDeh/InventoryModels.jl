@@ -24,7 +24,7 @@ using Distributions, InventoryModels
     @test state(is) == [0,10,0,10,0,10,0,10,0,52,15,13,14,12,11,9]
     @test action_size(is) == 6*2 + 2
     
-    is2 = sl_sip(1,10,100,0.,0,[20,40,60,40], 0.0)
+    is2 = sl_sip(1,10,100,0.,0,[20,40,60,40,0,0,0,0], 0.0, horizon = 4)
     @test state(is2) == [0,20,40,60,40,0]
     is2([14,70])
     @test reward(is2) == -(100 + 0 + 50*1)
