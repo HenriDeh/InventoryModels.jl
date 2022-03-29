@@ -39,6 +39,9 @@ RLBase.is_terminated(is::InventorySystem) = is.t > is.T
 RLBase.reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, map(print_state, is.bom))
 print_action(is::InventorySystem) = reduce(vcat, map(print_action, is.bom))
+RLBase.state_space(is::InventorySystem) = state_size(is)
+RLBase.action_space(is::InventorySystem) = action_size(is)
+
 
 function compute_quantities(is,action)
     actions = Iterators.Stateful(action)
