@@ -55,7 +55,7 @@ Base.push!(p::Pwla, x) = push!(p.breakpoints, x)
 
 function (pwla::Pwla)(y)
     if length(pwla.breakpoints) > 0
-        return (@view pwla.breakpoints[end:-1:1])[Int(round((y - pwla.range[1])/pwla.range.step)+1)]
+        return (@view pwla.breakpoints[end:-1:1])[Int(round((y - pwla.range[1])/step(pwla.range))+1)]
     else
         return zero(y)
     end
@@ -107,9 +107,9 @@ function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
     else
         df = instance.demand_forecasts[t]
         ub = instance.backlog ? quantile(df, 0.99999) : y
-        ξ = typeof(y)(pwla.range.step):typeof(y)(pwla.range.step):ub
+        ξ = step(pwla.range):step(pwla.range):ub
         x = y .- ξ
-        p = cdf.(df, ξ .+ ξ.step.hi/2) .- cdf.(df, ξ .- ξ.step.hi/2)
+        p = cdf.(df, ξ .+ step(ξ)/2) .- cdf.(df, ξ .- step(ξ)/2)
         c(x) = C(instance, x, t+1, pwla)
         return sum(c.(x) .* p) + (1 - cdf(df, y))*c(zero(y))*(1-instance.backlog)
     end
