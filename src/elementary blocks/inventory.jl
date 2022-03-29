@@ -85,7 +85,7 @@ end
 
 Randomizes inv's on-hand inventory with respect to its initial distribution"
 """
-function reset!(inv::Inventory)
+function RLBase.reset!(inv::Inventory)
     empty!(inv.cost_log)
     empty!(inv.on_hand_log)
     empty!(inv.fillrate_log)

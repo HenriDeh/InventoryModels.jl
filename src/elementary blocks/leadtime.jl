@@ -47,7 +47,7 @@ end
 
 inventory_position(lt::LeadTime) = sum(lt.onorder)
     
-function reset!(lt::LeadTime)
+function RLBase.reset!(lt::LeadTime)
     empty!(lt.cost_log)
     lt.onorder = max.(0., rand(lt.onorder_reset, lt.leadtime))
 end

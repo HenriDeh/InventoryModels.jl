@@ -56,7 +56,7 @@ function reward!(e::EndProduct)
     return r
 end
 
-function reset!(e::EndProduct)
+function RLBase.reset!(e::EndProduct)
     reset!(e.market)
     reset!(e.inventory)
     for source in e.sources

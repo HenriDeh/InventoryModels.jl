@@ -47,7 +47,7 @@ end
 
 inventory_position(sup::Supplier) = inventory_position(sup.leadtime)
 
-function reset!(s::Supplier)
+function RLBase.reset!(s::Supplier)
     empty!(s.cost_log)
     empty!(s.batchsize_log)
     reset!(s.leadtime)

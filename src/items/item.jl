@@ -46,7 +46,7 @@ function reward!(e::Item)
     return r
 end
 
-function reset!(e::Item)
+function RLBase.reset!(e::Item)
     empty!(e.position_log)
     reset!(e.inventory)
     for source in e.sources

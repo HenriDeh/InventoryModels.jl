@@ -1,10 +1,13 @@
 module InventoryModels
-
+#using DataStructures : reset! as dsreset!
+using ReinforcementLearningBase
 using Requires
-using Distributions, DataStructures, MacroTools, Base.Iterators, Reexport
+using Distributions, MacroTools, Base.Iterators, Reexport
+
 
 const NumDist = Union{Number, Distribution}
 const State = Union{NumDist, AbstractVector{<:NumDist}}
+#const RLBase = ReinforcementLearningBase
 
 abstract type AbstractItem end
 
@@ -29,7 +32,7 @@ export CVNormal, cv
 include("constraints.jl")
 export RessourceConstraint
 include("inventory_system.jl")
-export InventorySystem, state, state_size, action_size, reward, reset!, is_terminated, print_state, print_action
+export InventorySystem, state_size, action_size, print_state, print_action
 include("utils.jl")
 export test_policy
 include("zoo.jl")

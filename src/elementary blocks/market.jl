@@ -35,9 +35,6 @@ state_size(ma::Market) = 1+ma.horizon*length(ma.forecast_reset)
 function print_state(ma::Market)
     n_param = length(ma.forecasts) ÷ ma.horizon
     forecasts = ["$(ma.name) demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
-    if !forecast 
-        empty!(forecasts) 
-    end
     return ma.lostsales ? forecasts : ["$(ma.name) backorder" => ma.backorder ; forecasts]
 end
 
@@ -65,7 +62,7 @@ function reward!(ma::Market)
     return -cost
 end
 
-function reset!(ma::Market)
+function RLBase.reset!(ma::Market)
     for fr in ma.forecast_reset
         Iterators.reset!(fr, fr.itr)
     end

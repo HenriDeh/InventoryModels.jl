@@ -31,7 +31,7 @@ function (rc::RessourceConstraint)()
     end
 end
 
-function reset!(rc::RessourceConstraint)
+function RLBase.reset!(rc::RessourceConstraint)
     empty!(rc.setup_log)
     empty!(rc.utilization_log)
 end 

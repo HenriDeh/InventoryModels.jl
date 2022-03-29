@@ -67,7 +67,7 @@ end
 
 inventory_position(ass::Assembly) = inventory_position(ass.leadtime)
 
-function reset!(a::Assembly) 
+function RLBase.reset!(a::Assembly) 
     empty!(a.cost_log)
     empty!(a.batchsize_log)
     reset!(a.leadtime)

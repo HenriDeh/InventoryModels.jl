@@ -1,6 +1,4 @@
-using ReinforcementLearningBase
-
-mutable struct InventorySystem <: AbstractEnv
+mutable struct InventorySystem <: RLBase.AbstractEnv
     t::Int
     T::Int
     bom::Vector{AbstractItem}
@@ -35,8 +33,8 @@ function InventorySystem(T, bom::Vector{<:AbstractItem}, constraints = AbstractC
 end
 
 RLBase.state(is::InventorySystem) = reduce(vcat, map(state,is.bom))
-RLBase.state_size(is::InventorySystem) = sum(map(state_size,is.bom))
-RLBase.action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
+state_size(is::InventorySystem) = sum(map(state_size,is.bom))
+action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
 RLBase.is_terminated(is::InventorySystem) = is.t > is.T
 RLBase.reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, map(print_state, is.bom))
@@ -79,7 +77,7 @@ end
 
 (is::InventorySystem)(action::AbstractMatrix) = is(vec(action))
 
-function reset!(is::InventorySystem)
+function RLBase.reset!(is::InventorySystem)
     reset!.(is.bom)
     reset!.(is.constraints)
     is.t = 1
