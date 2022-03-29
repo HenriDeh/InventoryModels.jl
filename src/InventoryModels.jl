@@ -1,8 +1,9 @@
 module InventoryModels
 #using DataStructures : reset! as dsreset!
-using ReinforcementLearningBase
-using Requires
 using Distributions, MacroTools, Base.Iterators, Reexport
+
+@reexport using ReinforcementLearningBase
+using Requires
 
 
 const NumDist = Union{Number, Distribution}
