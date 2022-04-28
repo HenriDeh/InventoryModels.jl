@@ -1,7 +1,7 @@
 module Scarf
 
-using Distributions, SpecialFunctions
 export Instance, DP_sS
+using Distributions, SpecialFunctions
 
 mutable struct Instance{T <: Real}
     holding_cost::T
@@ -118,10 +118,10 @@ end
 function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
     H = instance.H
     λ = instance.lead_time
-    meandemand = max(stepsize, mean(mean.(instance.demand_forecasts)))
+    maxdemand = max(stepsize, maximum(mean.(instance.demand_forecasts)))
     critical_ratio = 1# (instance.backorder_cost-instance.holding_cost)/instance.backorder_cost
-    EOQ = sqrt(2*meandemand*instance.setup_cost/(critical_ratio*instance.holding_cost))
-    ub = 2*(EOQ+meandemand*λ)
+    EOQ = sqrt(2*maxdemand*instance.setup_cost/(critical_ratio*instance.holding_cost))
+    ub = 2*(EOQ+maxdemand*λ)
     upperbound = ub + stepsize - ub%stepsize
     C_tplus1 = Pwla(stepsize)
     for t in H-λ:-1:1
@@ -147,8 +147,8 @@ function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
         end
         instance.s[t] = y
         C_t.range = y:stepsize:upperbound
-        if C_t[upperbound] < C_t[y]
-            @warn "Upperbound is too low at iteration $t"
+        if C_t(upperbound) < C_t(y)
+            #@warn "Upperbound is too low at iteration $t: $(C_t(upperbound)) vs$(C_t(y))"
         end
         C_tplus1 = C_t
     end
