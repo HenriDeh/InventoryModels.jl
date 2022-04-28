@@ -147,6 +147,9 @@ function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
         end
         instance.s[t] = y
         C_t.range = y:stepsize:upperbound
+        if C_t[upperbound] < C_t[y]
+            @warn "Upperbound is too low at iteration $t"
+        end
         C_tplus1 = C_t
     end
 end
