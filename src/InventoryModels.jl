@@ -43,6 +43,10 @@ export Scarf
 include("Scarf/interface.jl")
 export ISLogger
 include("logger.jl")
+
+#state less objects are unchanged when reseted
+reset!(::Any) = nothing
+
 #=export dashboard, draw_graph
 include("dashboard/dashboard.jl")=#
 end

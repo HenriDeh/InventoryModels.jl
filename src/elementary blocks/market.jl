@@ -65,6 +65,7 @@ end
 function RLBase.reset!(ma::Market)
     for fr in ma.forecast_reset
         Iterators.reset!(fr, fr.itr)
+        reset!.(fr.itr.xs)
     end
     ma.forecasts = Float64[rand(param) for _ in 1:ma.horizon for param in popfirst!.(ma.forecast_reset)]
     ma.backorder = rand(ma.backorder_reset)
