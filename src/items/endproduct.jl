@@ -7,7 +7,7 @@ mutable struct EndProduct{M<:Market, I<:Inventory, S<:Tuple, P} <: AbstractItem
     name::String
 end
 
-function EndProduct(market::Market, inventory::Inventory, sources::Union{Assembly, Supplier}...; policy = sSPolicy(), name = "product")
+function EndProduct(market::Market, inventory::Inventory, sources::Union{Assembly, Supplier, Depot}...; policy = sSPolicy(), name = "product")
     if inventory.onhand < 0
         market.backorder -= inventory.onhand
         inventory.onhand = 0

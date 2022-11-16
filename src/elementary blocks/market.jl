@@ -32,7 +32,7 @@ end
 
 state(ma::Market) = [ma.backorder; ma.forecasts]
 state_size(ma::Market) = 1+ma.horizon*length(ma.forecast_reset)
-function print_state(ma::Market, forecast = true)
+function print_state(ma::Market; forecast = true)
     n_param = length(ma.forecasts) ÷ ma.horizon
     forecasts = ["$(ma.name) demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
     if !forecast 
@@ -67,8 +67,8 @@ end
 
 function reset!(ma::Market)
     for fr in ma.forecast_reset
-        Iterators.reset!(fr, fr.itr)
-        reset!.(fr.itr.xs)
+        Iterators.reset!(fr, fr.itr) #Reset Stateful.itr
+        reset!.(fr.itr.xs) #Reset itr content, e.g. MinMaxUniformDemand
     end
     ma.forecasts = Float64[rand(param) for _ in 1:ma.horizon for param in popfirst!.(ma.forecast_reset)]
     ma.backorder = rand(ma.backorder_reset)

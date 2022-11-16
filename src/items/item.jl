@@ -6,11 +6,12 @@ mutable struct Item{I<:Inventory, S<:Tuple, P} <: AbstractItem
     name::String
 end
 
-function Item(inventory::Inventory, sources::Union{Assembly, Supplier}...; policy = sSPolicy(), name = "item")
+function Item(inventory::Inventory, sources::Union{Assembly, Supplier, Depot}...; policy = sSPolicy(), name = "item")
     Item(inventory, sources, policy, zeros(0), name)
 end
 
 state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
+
 state_size(e::Item) = state_size(e.inventory) + sum(state_size.(e.sources)) 
 action_size(e::Item) = action_size(e.policy)*length(e.sources)
 function print_state(e::Item; forecast = true)

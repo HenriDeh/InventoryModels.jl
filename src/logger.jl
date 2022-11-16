@@ -16,6 +16,9 @@ function ISLogger(is::InventorySystem)
     ISLogger(logs, 0)
 end
 
+ISLogger(is::SingleItemMMFE) = ISLogger(is.env) 
+
+
 function (logger::ISLogger)(is::InventorySystem; log_id = 0)
     logger.nlogs +=1
     for item in is.bom
@@ -31,6 +34,8 @@ function (logger::ISLogger)(is::InventorySystem; log_id = 0)
         append!(logger.logs[cons.name], df)
     end
 end
+
+(logger::ISLogger)(is::SingleItemMMFE; log_id = 0) = logger(is.env; log_id = log_id)
 
 Base.getindex(logger::ISLogger, key) = logger.logs[key]
 
