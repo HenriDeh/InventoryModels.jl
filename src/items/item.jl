@@ -10,10 +10,11 @@ function Item(inventory::Inventory, sources::Union{Assembly, Supplier}...; polic
     Item(inventory, sources, policy, zeros(0), name)
 end
 
-RLBase.state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
+state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
+
 state_size(e::Item) = state_size(e.inventory) + sum(state_size.(e.sources)) 
 action_size(e::Item) = action_size(e.policy)*length(e.sources)
-function print_state(e::Item)
+function print_state(e::Item; forecast = true)
     ps = [print_state(e.inventory); reduce(vcat, print_state.(e.sources))]
     return [e.name*" "*first(p) => last(p) for p in ps]    
 end
@@ -46,7 +47,7 @@ function reward!(e::Item)
     return r
 end
 
-function RLBase.reset!(e::Item)
+function reset!(e::Item)
     empty!(e.position_log)
     reset!(e.inventory)
     for source in e.sources

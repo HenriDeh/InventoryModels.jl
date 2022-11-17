@@ -28,7 +28,9 @@ include("items/endproduct.jl")
 export EndProduct
 include("items/item.jl")
 export Item
-include("cvnormal.jl")
+include("items/depot.jl")
+export Depot
+include("demand_distributions.jl")
 export CVNormal, cv
 include("constraints.jl")
 export RessourceConstraint
@@ -40,7 +42,6 @@ include("zoo.jl")
 export sl_sip
 include("Scarf/Scarf.jl")
 export Scarf
-include("Scarf/interface.jl")
 export ISLogger
 include("logger.jl")
 

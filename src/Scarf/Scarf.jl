@@ -115,7 +115,7 @@ function expected_future_cost(instance::Instance, y, t::Int, pwla::Pwla)
     end
 end
 
-function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
+function DP_sS(instance::Instance{T}, stepsize::T = one(T); zero_boundary = true) where T <: Real
     H = instance.H
     λ = instance.lead_time
     maxdemand = max(stepsize, maximum(mean.(instance.demand_forecasts)))
@@ -123,8 +123,9 @@ function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
     EOQ = sqrt(2*maxdemand*instance.setup_cost/(critical_ratio*instance.holding_cost))
     ub = 2*(EOQ+maxdemand*λ)
     upperbound = ub + stepsize - ub%stepsize
-    C_tplus1 = Pwla(stepsize)
-    for t in H-λ:-1:1
+    C_tplus1 = Pwla(stepsize) # zero_boundary ? Pwla(stepsize) : stationary_boundary(instance, stepsize)
+    start = H - λ # (zero_boundary ? λ : 0)
+    for t in start:-1:1
         C_t = Pwla(stepsize)
         descending = true
         y = upperbound
@@ -147,11 +148,26 @@ function DP_sS(instance::Instance{T}, stepsize::T = one(T)) where T <: Real
         end
         instance.s[t] = y
         C_t.range = y:stepsize:upperbound
-        if C_t(upperbound) < C_t(y)
-            #@warn "Upperbound is too low at iteration $t: $(C_t(upperbound)) vs$(C_t(y))"
+        if C_t(upperbound) < C_t(y) && false
+            @warn "Upperbound is too low at iteration $t: $(C_t(upperbound)) vs$(C_t(y))" maxlog = 1
         end
         C_tplus1 = C_t
     end
+    return C_tplus1
+end
+
+function stationary_boundary(instance, stepsize)
+    μ = mean(mean.(instance.demand_forecasts))
+    EOQ = sqrt(2*μ*instance.setup_cost/(instance.holding_cost))
+    TBO = max(Int(ceil(EOQ/μ)),8)
+
+    CV = mean(std.(instance.demand_forecasts))/μ
+    new_forecast = fill(μ, TBO*2)
+
+    stationary_instance = Instance(instance.holding_cost, instance.backorder_cost, instance.setup_cost,instance.production_cost,
+        CV, instance.lead_time, new_forecast, instance.gamma, backlog = instance.backlog)
+    
+    return DP_sS(stationary_instance, stepsize)
 end
 
 end #module
