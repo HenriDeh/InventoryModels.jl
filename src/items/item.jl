@@ -6,7 +6,7 @@ mutable struct Item{I<:Inventory, S<:Tuple, P} <: AbstractItem
     name::String
 end
 
-function Item(inventory::Inventory, sources::Union{Assembly, Supplier, Depot}...; policy = sSPolicy(), name = "item")
+function Item(inventory::Inventory, sources::Union{Assembly, Supplier}...; policy = sSPolicy(), name = "item")
     Item(inventory, sources, policy, zeros(0), name)
 end
 
