@@ -1,4 +1,4 @@
-mutable struct Depot{I<:Inventory, P} <: AbstractItem
+mutable struct Depot{I<:Inventory} <: AbstractItem
     inventory::I 
     position_log::Vector{Float64}
     name::String
@@ -8,7 +8,7 @@ function Depot(inventory::Inventory; name = "depot")
     Depot(inventory, zeros(0), name)
 end
 
-state(e::Depot) = state(e.inventory)
+ReinforcementLearningBase.state(e::Depot) = state(e.inventory)
 
 state_size(e::Depot) = state_size(e.inventory)
 action_size(e::Depot) = 0
@@ -33,7 +33,7 @@ function reward!(e::Depot)
     return r
 end
 
-function reset!(e::Depot)
+function ReinforcementLearningBase.reset!(e::Depot)
     empty!(e.position_log)
     reset!(e.inventory)
     return nothing

@@ -1,5 +1,5 @@
 @testset "item.jl" begin
-    sup = Supplier(100, 10, leadtime = LeadTime(1, 3, 10))
+    sup = Supplier(100, 10, leadtime = LeadTime(1, 3, fill(10,3)))
     inv = Inventory(3, 50)
     item = Item(inv, sup)
     @test state(item) == [50,10,10,10]

@@ -1,6 +1,6 @@
  @testset "inventory.jl" begin
     inv = Inventory(3, 10)
-    @test state(inv) == [inv.onhand] == [10]
+    @test state(inv) == [inv.onhand.val] == [10]
     @test length(state(inv)) == state_size(inv) == 1
     @test InventoryModels.inventory_position(inv) == 10
     dest = []
@@ -17,7 +17,7 @@
     @test state(inv) == [0]
     @test dest == [7, inv, 3, inv]
     reset!(inv)
-    @test state(inv) == [inv.onhand] == [10]
+    @test state(inv) == [inv.onhand.val] == [10]
     @test InventoryModels.inventory_position(inv) == 10
     dest2 = []
     InventoryModels.pull!(inv, 10, dest)
@@ -35,6 +35,5 @@
     @test state(inv) == [10]
     inv.capacity = 20
     reset!(inv)
-    @test 10 < inv.onhand < 20
-    
+    @test 10 < inv.onhand.val < 20    
 end

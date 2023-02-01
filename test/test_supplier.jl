@@ -20,7 +20,7 @@
     @test state(sup2) == []
     reset!(sup)
 
-    sup = Supplier(100, 10, leadtime = LeadTime(1, 3, 10))
+    sup = Supplier(100, 10, leadtime = LeadTime(1, 3, fill(10,3)))
     @test state(sup) == [10,10,10]
     @test state_size(sup) == 3
     dest = []

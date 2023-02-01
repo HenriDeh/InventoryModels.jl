@@ -8,14 +8,14 @@ mutable struct EndProduct{M<:Market, I<:Inventory, S<:Tuple, P} <: AbstractItem
 end
 
 function EndProduct(market::Market, inventory::Inventory, sources::Union{Assembly, Supplier}...; policy = sSPolicy(), name = "product")
-    if inventory.onhand < 0
-        market.backorder -= inventory.onhand
-        inventory.onhand = 0
+    if inventory.onhand.val < 0
+        market.backorders.val -= inventory.onhand.val
+        inventory.onhand.val = 0
     end
     EndProduct(market, inventory, sources, policy, zeros(0), name)
 end
 
-state(e::EndProduct) = [state(e.market); state(e.inventory); reduce(vcat,[state(source) for source in e.sources])]
+ReinforcementLearningBase.state(e::EndProduct) = [state(e.market); state(e.inventory); reduce(vcat,[state(source) for source in e.sources])]
 state_size(e::EndProduct) = state_size(e.market) + state_size(e.inventory) + sum(map(state_size, e.sources)) 
 action_size(e::EndProduct) = action_size(e.policy)*length(e.sources)
 function print_state(e::EndProduct; forecast = true)
@@ -56,15 +56,15 @@ function reward!(e::EndProduct)
     return r
 end
 
-function reset!(e::EndProduct)
+function ReinforcementLearningBase.reset!(e::EndProduct)
     reset!(e.market)
     reset!(e.inventory)
     for source in e.sources
         reset!(source)
     end
-    if e.inventory.onhand < 0
-        e.market.backorder -= e.inventory.onhand
-        e.inventory.onhand = 0
+    if e.inventory.onhand.val < 0
+        e.market.backorders.val -= e.inventory.onhand.val
+        e.inventory.onhand.val = 0
     end
     empty!(e.position_log)
     return nothing

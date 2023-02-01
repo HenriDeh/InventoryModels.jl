@@ -1,89 +1,122 @@
-mutable struct Market{D<:Distribution, L<:Union{Bool, AbstractFloat}, F, Df, Db <: Distribution}
+mutable struct Market{D<:Distribution, F, B <: State, FC <: Tuple}
     stockout_cost::F 
     demand_dist::Type{D}
-    backorder::Float64
-    lostsales::L
+    backorders::B
+    lostsales::Bool
     horizon::Int
-    forecasts::Vector{Float64}
+    forecast_parameters::FC
     last_demand::Float64
-    backorder_reset::Db
-    forecast_reset::Df
     backorder_log::Vector{Float64}
     fillrate_log::Vector{Float64}
     cost_log::Vector{Float64}
     name::String
 end
 
-function Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizon::Int, backorder_reset::NumDist, forecast_reset::State...; lostsales::Bool = false, name="market")
+"""
+```
+    Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizon::Int, backorders::State, forecast_parameters::Tuple; lostsales::Bool = false, name="market")
+```
+Creates a market module. `stockout_cost` is a callable that takes a (::Market) argument and returns the stockout costs for the period. 
+Providing a scalar will result in a `LinearStockoutCost(stockout_cost)`.
+`demand_distribution` is the type of the distribution of the demand. 
+`horizon` is the number of periods of forecast returned in the state.
+`backorders` is a (scalar) `State` of the backorder level.
+`forecast_parameters` is a `NTuple` of `State`, each defines the state of the parameters of `demand_distribution`.
+"""
+function Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizon::Int, backorders::State, forecast_parameters::Tuple; lostsales::Bool = false, name="market")
     @assert hasmethod(stockout_cost, Tuple{Market}) "stockout cost must have a method with `(::Market)` signature"
-    @assert all(x -> x isa State, forecast_reset)
-    @assert length(forecast_reset) == length(params(demand_distribution())) "Please provide a reset distribution for each parameter of $demand_distribution"
-    bd = parametrify(backorder_reset)
-    frd = Iterators.Stateful.(cycle.(parametrify.(forecast_reset)))
-    forecasts = Float64[rand(param) for _ in 1:horizon for param in popfirst!.(frd)]
+    @assert length(forecast_parameters) == length(params(demand_distribution())) "Please provide a reset distribution for each parameter of $demand_distribution"
 
-    Market{demand_distribution, typeof(lostsales), typeof(stockout_cost), typeof(frd), typeof(bd)}(
-        stockout_cost, demand_distribution, Float64(rand(bd)), lostsales, horizon, forecasts, 0.0, bd, tuple(frd...), zeros(0), zeros(0), zeros(0), name)
-end
-
-function Market(stockout_cost::Number, demand_distribution::Type{<:Distribution}, horizon::Int, backorder_reset::NumDist, forecast_reset::State...; lostsales = false, name="market")
-    Market(LinearStockoutCost(stockout_cost), demand_distribution, horizon, backorder_reset, forecast_reset..., lostsales = lostsales, name = name)
-end
-
-state(ma::Market) = [ma.backorder; ma.forecasts]
-state_size(ma::Market) = 1+ma.horizon*length(ma.forecast_reset)
-function print_state(ma::Market; forecast = true)
-    n_param = length(ma.forecasts) ÷ ma.horizon
-    forecasts = ["$(ma.name) demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
-    if !forecast 
-        empty!(forecasts) 
+    if !all(forecast_parameters) do p
+            p isa State        
+        end
+        fp = ((State(p) for p in forecast_parameters)...,)
+    else
+        fp = forecast_parameters
     end
-    return ma.lostsales ? forecasts : ["$(ma.name) backorder" => ma.backorder ; forecasts]
+
+    Market{demand_distribution, typeof(stockout_cost), typeof(backorders), typeof(fp)}(
+        stockout_cost, demand_distribution, backorders, lostsales, horizon, fp, 0., zeros(0), zeros(0), zeros(0), name)
+end
+
+function Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizon::Int, backorders::Union{Number, Distribution}, forecast_parameters::Tuple; kwargs...)
+    Market(stockout_cost, demand_distribution, horizon, State(backorders), forecast_parameters; kwargs...)
+end
+
+function Market(stockout_cost::Number, demand_distribution::Type{<:Distribution}, horizon::Int, backorders::Union{Number, Distribution}, forecast_parameters::Tuple; kwargs...)
+    Market(LinearStockoutCost(stockout_cost), demand_distribution, horizon, backorders, forecast_parameters; kwargs...)
+end
+
+function ReinforcementLearningBase.state(ma::Market)
+    if ma.lostsales
+        mapreduce(p -> p.val[1:ma.horizon], vcat, ma.forecast_parameters)
+    else
+        [ma.backorders.val; mapreduce(p -> p.val[1:ma.horizon], vcat, ma.forecast_parameters)]
+    end
+end
+state_size(ma::Market) = (1-ma.lostsales)+ma.horizon*length(ma.forecast_parameters)
+function print_state(ma::Market; forecast = true)
+    if ! forecast
+        return "$(ma.name) backorders" => ma.backorders.val
+    end
+    s = ["$(ma.name) backorders" => ma.backorders.val]
+    forecast_params = state(ma)[2:end]
+    idx = 1
+    for j in eachindex(ma.forecast_parameters)
+        for i in 0:horizon-1
+            push!(s, "$(ma.name) demand(parameter $j) t+$(i)" => forecast_params[idx])
+            idx += 1
+        end
+    end
+    return s
 end
 
 function demand!(ma::Market)
-    param = ma.forecasts[1:length(ma.forecast_reset)]
-    demand = rand(ma.demand_dist(param...))
+    params = (first(p.val) for p in ma.forecast_parameters)
+    demand_distribution = ma.demand_dist(params...)
+    demand = rand(demand_distribution)
     ma.last_demand = max(zero(demand), demand)
-    return ma.backorder + ma.last_demand
+    return ma.backorders.val + ma.last_demand
 end
 
 function Base.push!(ma::Market, quantity, source)  
-    ma.backorder += ma.last_demand 
-    ma.backorder -= min(quantity, ma.backorder)
+    ma.backorders.val += ma.last_demand 
+    ma.backorders.val -= min(quantity, ma.backorders.val)
     return nothing
 end
 
 function reward!(ma::Market)
-    deleteat!(ma.forecasts, 1:length(ma.forecast_reset))
-    push!(ma.forecasts, rand.(popfirst!.(ma.forecast_reset))...)
+    for param_state in ma.forecast_parameters
+        popfirst!(param_state.val)
+        if length(param_state.val) < ma.horizon
+            push!(param_state.val, 0.)
+        end
+    end
+
     cost = ma.stockout_cost(ma)
-    push!(ma.backorder_log, ma.backorder)
-    push!(ma.fillrate_log, max(0, (1-ma.backorder/ma.last_demand)))
+    push!(ma.backorder_log, ma.backorders.val)
+    push!(ma.fillrate_log, max(0, (1-ma.backorders.val/ma.last_demand)))
     push!(ma.cost_log, cost)
-    ma.backorder *= (1 - ma.lostsales)
+    ma.backorders.val *= (1 - ma.lostsales)
     return -cost
 end
 
-function reset!(ma::Market)
-    for fr in ma.forecast_reset
-        Iterators.reset!(fr, fr.itr) #Reset Stateful.itr
-        reset!.(fr.itr.xs) #Reset itr content, e.g. MinMaxUniformDemand
+function ReinforcementLearningBase.reset!(ma::Market)
+    reset!(ma.backorders)
+    for param_state in ma.forecast_parameters
+        reset!(param_state)
     end
-    ma.forecasts = Float64[rand(param) for _ in 1:ma.horizon for param in popfirst!.(ma.forecast_reset)]
-    ma.backorder = rand(ma.backorder_reset)
     empty!(ma.backorder_log)
     empty!(ma.cost_log)
     empty!(ma.fillrate_log)
     return nothing
 end
 
-
-inventory_position(ma::Market) = -ma.backorder
+inventory_position(ma::Market) = -ma.backorders.val
 
 mutable struct LinearStockoutCost{T}
     b::T
 end
-(f::LinearStockoutCost)(ma::Market) = f.b*ma.backorder
+(f::LinearStockoutCost)(ma::Market) = f.b*ma.backorders.val
 
-Base.show(io::IO, market::Market{D,F,Df,Db}) where {D,F,Df,Db} = print(io, "Market($D, LS:$(market.lostsales))")
+Base.show(io::IO, market::Market{D, F, B, FC}) where {D, F, B, FC} = print(io, "Market($D, LS:$(market.lostsales))")

@@ -1,13 +1,16 @@
 module InventoryModels
 
 using Requires
-using Distributions, DataStructures, MacroTools, Base.Iterators, Reexport
+using Distributions, DataStructures, MacroTools, Reexport, Base.Iterators
+@reexport using ReinforcementLearningBase: reset!, state, RLBase, ReinforcementLearningBase, is_terminated, AbstractEnv, reward
+import IterTools
 
 const NumDist = Union{Number, Distribution}
-const State = Union{NumDist, AbstractVector{<:NumDist}}
+#const State = Union{NumDist, AbstractVector{<:NumDist}}
 
 abstract type AbstractItem end
 
+include("state.jl")
 include("elementary blocks/inventory.jl")
 export Inventory, LinearHoldingCost
 include("elementary blocks/leadtime.jl")
@@ -29,11 +32,9 @@ export Depot
 include("demand_distributions.jl")
 export CVNormal, cv
 include("constraints.jl")
-export RessourceConstraint
+#export RessourceConstraint
 include("inventory_system.jl")
-export InventorySystem, state, state_size, action_size, reward, reset!, is_terminated, print_state, print_action
-include("utils.jl")
-export test_policy
+export InventorySystem, state_size, action_size, print_state, print_action
 include("zoo.jl")
 export sl_sip
 include("Scarf/Scarf.jl")
@@ -41,8 +42,8 @@ export Scarf
 export ISLogger
 include("logger.jl")
 
-#state less objects are unchanged when reseted
-reset!(::Any) = nothing
+#stateless objects are unchanged when reseted
+RLBase.reset!(::Any) = nothing
 
 #=export dashboard, draw_graph
 include("dashboard/dashboard.jl")=#

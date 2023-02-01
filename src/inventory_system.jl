@@ -1,4 +1,4 @@
-mutable struct InventorySystem
+mutable struct InventorySystem <: AbstractEnv
     t::Int
     T::Int
     bom::Vector{AbstractItem}
@@ -32,11 +32,11 @@ function InventorySystem(T, bom::Vector{<:AbstractItem}, constraints = AbstractC
     InventorySystem(1, maxT, bom_to, constraints, 0.)
 end
 
-state(is::InventorySystem) = reduce(vcat, map(state,is.bom))
+ReinforcementLearningBase.state(is::InventorySystem) = reduce(vcat, map(state,is.bom))
 state_size(is::InventorySystem) = sum(map(state_size,is.bom))
 action_size(is::InventorySystem)::Int = sum(map(action_size, is.bom))
-is_terminated(is::InventorySystem) = is.t > is.T
-reward(is::InventorySystem) = is.reward
+ReinforcementLearningBase.is_terminated(is::InventorySystem) = is.t > is.T
+ReinforcementLearningBase.reward(is::InventorySystem) = is.reward
 print_state(is::InventorySystem) = reduce(vcat, map(print_state, is.bom))
 print_action(is::InventorySystem) = reduce(vcat, map(print_action, is.bom))
 
@@ -45,6 +45,9 @@ function compute_quantities(is,action)
     quantity = IdDict{AbstractItem, Vector{Float64}}()
     for item in is.bom
         act_size = action_size(item)
+        if act_size == 0
+            continue
+        end
         Qs = Float64[]
         for polparams in partition(Iterators.take(actions, act_size), action_size(item.policy))
             push!(Qs, item.policy(item, polparams...))
@@ -59,8 +62,10 @@ function (is::InventorySystem)(action::AbstractVector)
     @assert action_size(is) == length(action) "action must be of length $(action_size(is))"
     quantity = compute_quantities(is, action)
     #Stage: PreActStage
-    for item in is.bom
-        item(quantity[item])
+    for pair in quantity
+        item = pair[1]
+        q = pair[2]
+        item(q)
     end
     #Stage: PreConsStage
     for cons in is.constraints
@@ -77,7 +82,7 @@ end
 
 (is::InventorySystem)(action::AbstractMatrix) = is(vec(action))
 
-function reset!(is::InventorySystem)
+function ReinforcementLearningBase.reset!(is::InventorySystem)
     reset!.(is.bom)
     reset!.(is.constraints)
     is.t = 1

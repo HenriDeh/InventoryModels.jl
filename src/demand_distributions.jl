@@ -37,7 +37,7 @@ function Base.rand(bw::BoundedWienerProcess)
     bw.x
 end
 
-reset!(b::BoundedWienerProcess) = b.x = rand(Uniform(b.lb,b.ub))
+RLBase.reset!(b::BoundedWienerProcess) = b.x = rand(Uniform(b.lb,b.ub))
 
 ###MinMaxUniformDemand
 mutable struct MinMaxUniformDemand{T} <: ContinuousUnivariateDistribution
@@ -57,7 +57,7 @@ end
 
 Base.rand(m::MinMaxUniformDemand) = rand(m.demand_dist)
 
-function reset!(m::MinMaxUniformDemand) 
+function ReinforcementLearningBase.reset!(m::MinMaxUniformDemand) 
     bdist = m.bound_dist
     _bounds = minmax(rand(bdist,2)...)
     _bounds2 = (_bounds[1], min(bdist.b, max(_bounds[2], _bounds[1] + minrange)))
@@ -82,7 +82,7 @@ function SingleItemMMFE(env, f)
     SingleItemMMFE(env, f, env.T, env.bom)    
 end
 
-MacroTools.@forward SingleItemMMFE.env state, state_size, action_size, is_terminated, reward, print_state, print_action
+MacroTools.@forward SingleItemMMFE.env ReinforcementLearningBase.state, state_size, action_size, ReinforcementLearningBase.is_terminated, ReinforcementLearningBase.reward, print_state, print_action
 
 function (mmfe::SingleItemMMFE)(action)
     r = mmfe.env(action)
