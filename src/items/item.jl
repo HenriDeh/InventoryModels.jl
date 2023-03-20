@@ -10,7 +10,8 @@ function Item(inventory::Inventory, sources::Union{Assembly, Supplier}...; polic
     Item(inventory, sources, policy, zeros(0), name)
 end
 
-state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
+ReinforcementLearningBase.state(e::Item) = [state(e.inventory); reduce(vcat, [state(source) for source in e.sources])]
+
 state_size(e::Item) = state_size(e.inventory) + sum(state_size.(e.sources)) 
 action_size(e::Item) = action_size(e.policy)*length(e.sources)
 function print_state(e::Item; forecast = true)
@@ -46,7 +47,7 @@ function reward!(e::Item)
     return r
 end
 
-function reset!(e::Item)
+function ReinforcementLearningBase.reset!(e::Item)
     empty!(e.position_log)
     reset!(e.inventory)
     for source in e.sources

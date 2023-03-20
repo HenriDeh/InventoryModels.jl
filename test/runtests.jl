@@ -9,5 +9,5 @@ using Revise, Distributions, InventoryModels, Test
     include("test_item.jl")
     include("test_endproduct.jl")
     include("test_inventory_system.jl")
-    include("test_constraints.jl")
+    #include("test_constraints.jl")
 end

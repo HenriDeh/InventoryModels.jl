@@ -1,40 +1,41 @@
-mutable struct LeadTime{F, D<:Distribution}
+mutable struct LeadTime{F, OO <: State}
     holding_cost::F
-    onorder::Vector{Float64}
+    onorder::OO
     leadtime::Int
-    onorder_reset::D
     pull_orders::IdDict{Any,Float64}
     cost_log::Vector{Float64}
 end
 
-function LeadTime(holding_cost, leadtime::Number, onorder::NumDist)
+function LeadTime(holding_cost, leadtime::Number, onorder::State)
     @assert hasmethod(holding_cost, Tuple{LeadTime}) "holding cost must have a method with (::LeadTime) signature"
-    doo = parametrify(onorder)
-    oo = max.(0.0, rand(doo, leadtime))
-    LeadTime(holding_cost, oo, Int(leadtime), doo, IdDict{Any, Float64}(), zeros(0))
+    @assert length(onorder.val) == leadtime
+    LeadTime(holding_cost, onorder, Int(leadtime), IdDict{Any, Float64}(), zeros(0))
 end
 
-function LeadTime(holding_cost::Number, leadtime::Number, onorder::NumDist)
+function LeadTime(holding_cost::Number, leadtime::Number, onorder::State)
     LeadTime(LinearHoldingCost(holding_cost), Int(leadtime), onorder)
 end
 
-function LeadTime(leadtime::Number, onorder::NumDist)
+LeadTime(holding_cost, leadtime, onorder::Union{Distribution, Vector{<:Union{Number, Distribution}}}) = LeadTime(holding_cost, leadtime, State(onorder))
+
+function LeadTime(leadtime::Number, onorder)
     LeadTime(it-> 0.0, leadtime, onorder)
 end
 
-state(lt::LeadTime) = vec(lt.onorder)
+
+ReinforcementLearningBase.state(lt::LeadTime) = lt.onorder.val
 state_size(lt::LeadTime) = lt.leadtime
-print_state(lt::LeadTime) = [" on order t+$i" => oo for (i, oo) in enumerate(lt.onorder)]
+print_state(lt::LeadTime) = [" on order t+$i" => oo for (i, oo) in enumerate(lt.onorder.val)]
 
 function Base.push!(lt::LeadTime, quantity, source)
     lt.pull_orders[source] = quantity
-    push!(lt.onorder, quantity)
+    push!(lt.onorder.val, quantity)
     nothing
 end
 
 function dispatch!(lt::LeadTime)
     destination, quantity = only(lt.pull_orders)
-    push!(destination, popfirst!(lt.onorder), lt)
+    push!(destination, popfirst!(lt.onorder.val), lt)
     nothing
 end
 
@@ -45,14 +46,15 @@ function reward!(lt::LeadTime)
     return -cost
 end
 
-inventory_position(lt::LeadTime) = sum(lt.onorder)
+inventory_position(lt::LeadTime) = sum(lt.onorder.val)
     
-function reset!(lt::LeadTime)
+function ReinforcementLearningBase.reset!(lt::LeadTime)
     empty!(lt.cost_log)
-    lt.onorder = max.(0., rand(lt.onorder_reset, lt.leadtime))
+    reset!(lt.onorder)
+    lt.onorder.val = max.(0., lt.onorder.val)
 end
 
 #Defined in item.jl
-(f::LinearHoldingCost)(lt::LeadTime) = f.h*sum(lt.onorder)
+(f::LinearHoldingCost)(lt::LeadTime) = f.h*sum(lt.onorder.val)
 
-Base.show(io::IO, lt::LeadTime{F,D}) where {F,D} = print(io, "LeadTime($(lt.leadtime) periods, $F)")
+Base.show(io::IO, lt::LeadTime{F,OO}) where {F,OO} = print(io, "LeadTime($(lt.leadtime) periods, $F)")

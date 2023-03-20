@@ -11,16 +11,16 @@ mutable struct Supplier{F,L <:LeadTime}
     name::String
 end
 
-function Supplier(order_cost; leadtime = leadtime::LeadTime = LeadTime(0, 0), capacity::Number = Inf, name = "supplier")
+function Supplier(order_cost; leadtime = leadtime::LeadTime = LeadTime(0, zeros(0)), capacity::Number = Inf, name = "supplier")
     @assert hasmethod(order_cost, Tuple{Supplier}) "order cost must have a method with `(::Supplier) signature`"
     Supplier(order_cost, Float64(capacity), leadtime, IdDict{Any,Float64}(), zeros(0), zeros(0), name)
 end
 
-function Supplier(fixed_order_cost::Number, variable_order_cost::Number; leadtime::LeadTime = LeadTime(0, 0), capacity::Number = Inf, name = "supplier") 
+function Supplier(fixed_order_cost::Number, variable_order_cost::Number; leadtime::LeadTime = LeadTime(0, zeros(0)), capacity::Number = Inf, name = "supplier") 
     Supplier(FixedLinearOrderCost(fixed_order_cost,variable_order_cost), leadtime = leadtime, capacity = capacity, name = name)
 end
 
-state(s::Supplier) = state(s.leadtime)
+ReinforcementLearningBase.state(s::Supplier) = state(s.leadtime)
 state_size(s::Supplier) = state_size(s.leadtime)
 print_state(s::Supplier) = print_state(s.leadtime)
 
@@ -47,7 +47,7 @@ end
 
 inventory_position(sup::Supplier) = inventory_position(sup.leadtime)
 
-function reset!(s::Supplier)
+function ReinforcementLearningBase.reset!(s::Supplier)
     empty!(s.cost_log)
     empty!(s.batchsize_log)
     reset!(s.leadtime)

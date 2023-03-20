@@ -10,18 +10,18 @@ mutable struct Assembly{F, L<:LeadTime, C <: Tuple}
     name::String
 end
 
-function Assembly(production_cost, components::Pair{<:Any, <:Number}...; leadtime = LeadTime(0,0), capacity = Inf, name = "assembly")
+function Assembly(production_cost, components::Pair{<:Any, <:Number}...; leadtime = LeadTime(0,zeros(0)), capacity = Inf, name = "assembly")
     @assert hasmethod(production_cost, Tuple{Assembly}) "production_cost must have a method with (::Assembly) signature"
     @assert length(components) >= 1 "Assembly must have at least one component"
     comps = tuple([first(pair) for pair in components]...)
     Assembly(production_cost, Float64(capacity), leadtime, comps, IdDict{Any, Float64}(components), IdDict{Any,Float64}(), zeros(0), zeros(0), name)
 end
 
-function Assembly(fixed_order_cost::Number, variable_order_cost::Number, components::Pair{<:Any, <:Number}...; leadtime = LeadTime(0,0), capacity = Inf, name = "assembly")
+function Assembly(fixed_order_cost::Number, variable_order_cost::Number, components::Pair{<:Any, <:Number}...; leadtime = LeadTime(0,zeros(0)), capacity = Inf, name = "assembly")
     Assembly(FixedLinearOrderCost(fixed_order_cost, variable_order_cost), components..., leadtime = leadtime, capacity = capacity, name = name)
 end
 
-state(a::Assembly) = state(a.leadtime)
+ReinforcementLearningBase.state(a::Assembly) = state(a.leadtime)
 state_size(a::Assembly) = state_size(a.leadtime)
 print_state(a::Assembly) = print_state(a.leadtime)
 
@@ -67,7 +67,7 @@ end
 
 inventory_position(ass::Assembly) = inventory_position(ass.leadtime)
 
-function reset!(a::Assembly) 
+function ReinforcementLearningBase.reset!(a::Assembly) 
     empty!(a.cost_log)
     empty!(a.batchsize_log)
     reset!(a.leadtime)

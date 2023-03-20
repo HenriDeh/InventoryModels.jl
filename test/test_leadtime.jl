@@ -1,5 +1,5 @@
 @testset "leadtime.jl" begin
-    lt = LeadTime(2, 3, 10)
+    lt = LeadTime(2, 3, fill(10, 3))
     @test state(lt) == [10,10,10]
     @test state_size(lt) == 3
     dest = []
@@ -16,9 +16,9 @@
     @test state(lt) == [10,10,10]
     @test isempty(lt.pull_orders)
 
-    lt = LeadTime(3, Uniform(5,15))
+    lt = LeadTime(3, fill(Uniform(5,15), 3))
     @test all(5 .< state(lt) .< 15)
-    @test state_size(lt) == 3
+    @test state_size(lt) == 3 == length(state(lt))
     next = first(state(lt))
     dest = []
     InventoryModels.push!(lt, 5, dest)

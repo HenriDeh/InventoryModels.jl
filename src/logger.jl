@@ -39,7 +39,7 @@ end
 
 Base.getindex(logger::ISLogger, key) = logger.logs[key]
 
-function reset!(logger::ISLogger)
+function RLBase.reset!(logger::ISLogger)
     logger.nlogs = 0
     for k in keys(logger.logs)
         logger.logs[k] = DataFrame()
@@ -82,4 +82,8 @@ function get_logs(c::RessourceConstraint)
     df = DataFrame("utilization" => c.utilization_log, "setups" => c.setup_log)
     df.iteration = 1:nrow(df)
     return df
+end
+
+function get_logs(d::Depot)
+    DataFrame()
 end

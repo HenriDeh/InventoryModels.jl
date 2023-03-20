@@ -34,7 +34,7 @@
 
     comp1 = Item(Inventory(0, 50), Supplier(100, 10))
     comp2 = Item(Inventory(0, 20), Supplier(100, 10))
-    ass = Assembly(100,10, comp1 => 2, comp2 =>1, leadtime = LeadTime(3, 20))
+    ass = Assembly(100,10, comp1 => 2, comp2 =>1, leadtime = LeadTime(3, fill(20,3)))
     @test state(ass) == [20,20,20]
     @test state_size(ass) == 3
     dest = []
