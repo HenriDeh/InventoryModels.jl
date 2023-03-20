@@ -24,7 +24,7 @@ include("items/endproduct.jl")
 export EndProduct
 include("items/item.jl")
 export Item
-include("cvnormal.jl")
+include("demand_distributions.jl")
 export CVNormal, cv
 include("constraints.jl")
 export RessourceConstraint
