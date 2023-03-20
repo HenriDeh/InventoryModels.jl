@@ -36,7 +36,6 @@ include("zoo.jl")
 export sl_sip
 include("Scarf/Scarf.jl")
 export Scarf
-include("Scarf/interface.jl")
 export ISLogger
 include("logger.jl")
 
