@@ -16,6 +16,9 @@ function ISLogger(is::InventorySystem)
     ISLogger(logs, 0)
 end
 
+ISLogger(is::SingleItemMMFE) = ISLogger(is.env) 
+
+
 function (logger::ISLogger)(is::InventorySystem; log_id = 0)
     logger.nlogs +=1
     for item in is.bom
@@ -31,6 +34,8 @@ function (logger::ISLogger)(is::InventorySystem; log_id = 0)
         append!(logger.logs[cons.name], df)
     end
 end
+
+(logger::ISLogger)(is::SingleItemMMFE; log_id = 0) = logger(is.env; log_id = log_id)
 
 Base.getindex(logger::ISLogger, key) = logger.logs[key]
 
@@ -66,7 +71,7 @@ function get_logs(lt::LeadTime)
 end
 
 function get_logs(ma::Market)
-    DataFrame(market_backorder = ma.backorder_log, market_fillrate = ma.fillrate_log, market_cost = ma.cost_log)
+    DataFrame(market_demand = ma.demand_log, market_backorder = ma.backorder_log, market_fillrate = ma.fillrate_log, market_cost = ma.cost_log)
 end
 
 function get_logs(sup::Supplier)
