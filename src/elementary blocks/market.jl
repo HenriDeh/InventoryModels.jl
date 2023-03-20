@@ -8,6 +8,7 @@ mutable struct Market{D<:Distribution, L<:Union{Bool, AbstractFloat}, F, Df, Db 
     last_demand::Float64
     backorder_reset::Db
     forecast_reset::Df
+    demand_log::Vector{Float64}
     backorder_log::Vector{Float64}
     fillrate_log::Vector{Float64}
     cost_log::Vector{Float64}
@@ -23,7 +24,7 @@ function Market(stockout_cost, demand_distribution::Type{<:Distribution}, horizo
     forecasts = Float64[rand(param) for _ in 1:horizon for param in popfirst!.(frd)]
 
     Market{demand_distribution, typeof(lostsales), typeof(stockout_cost), typeof(frd), typeof(bd)}(
-        stockout_cost, demand_distribution, Float64(rand(bd)), lostsales, horizon, forecasts, 0.0, bd, tuple(frd...), zeros(0), zeros(0), zeros(0), name)
+        stockout_cost, demand_distribution, Float64(rand(bd)), lostsales, horizon, forecasts, 0.0, bd, tuple(frd...), zeros(0), zeros(0), zeros(0), zeros(0), name)
 end
 
 function Market(stockout_cost::Number, demand_distribution::Type{<:Distribution}, horizon::Int, backorder_reset::NumDist, forecast_reset::State...; lostsales = false, name="market")
@@ -32,7 +33,7 @@ end
 
 state(ma::Market) = [ma.backorder; ma.forecasts]
 state_size(ma::Market) = 1+ma.horizon*length(ma.forecast_reset)
-function print_state(ma::Market, forecast = true)
+function print_state(ma::Market; forecast = true)
     n_param = length(ma.forecasts) ÷ ma.horizon
     forecasts = ["$(ma.name) demand($j) t+$(i-1)" => p for (i,pars) in enumerate(partition(ma.forecasts, n_param)) for (j,p) in enumerate(pars)]
     if !forecast 
@@ -61,14 +62,15 @@ function reward!(ma::Market)
     push!(ma.backorder_log, ma.backorder)
     push!(ma.fillrate_log, max(0, (1-ma.backorder/ma.last_demand)))
     push!(ma.cost_log, cost)
+    push!(ma.demand_log, ma.last_demand)
     ma.backorder *= (1 - ma.lostsales)
     return -cost
 end
 
 function reset!(ma::Market)
     for fr in ma.forecast_reset
-        Iterators.reset!(fr, fr.itr)
-        reset!.(fr.itr.xs)
+        Iterators.reset!(fr, fr.itr) #Reset Stateful.itr
+        reset!.(fr.itr.xs) #Reset itr content, e.g. MinMaxUniformDemand
     end
     ma.forecasts = Float64[rand(param) for _ in 1:ma.horizon for param in popfirst!.(ma.forecast_reset)]
     ma.backorder = rand(ma.backorder_reset)
